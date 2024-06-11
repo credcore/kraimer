@@ -8,7 +8,7 @@ export async function getExtractedFieldByName(
   const db = getDb();
   const result = await db.oneOrNone(
     `
-      SELECT id, extraction_id, name, value, strategy, status, session, created_at
+      SELECT id, extraction_id, name, value, strategy, status, created_at
       FROM extracted_field
       WHERE extraction_id = $<extractionId> AND name = $<name>
     `,
@@ -28,7 +28,6 @@ export async function getExtractedFieldByName(
     value: result.value,
     strategy: result.strategy,
     status: result.status as TaskStatusEnum,
-    session: result.session,
     createdAt: result.created_at,
   };
 }

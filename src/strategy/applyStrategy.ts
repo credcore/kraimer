@@ -7,7 +7,6 @@ const execAsync = promisify(exec);
 
 async function executeStrategyFile(
   strategyPath: string,
-  sessionId: string,
   documentGroupId: number,
   args: any
 ) {
@@ -15,7 +14,7 @@ async function executeStrategyFile(
     `--${key}`,
     `${value}`,
   ]);
-  const command = `${strategyPath} --session ${sessionId} --document-group-id ${documentGroupId} ${argsArray.join(
+  const command = `${strategyPath} --document-group-id ${documentGroupId} ${argsArray.join(
     " "
   )}`;
   try {
@@ -34,7 +33,6 @@ async function executeStrategyFile(
 export async function applyStrategy(
   documentGroupId: number,
   strategy: string,
-  sessionId: string,
   args: any
 ) {
   let strategyPath = strategy;
@@ -48,5 +46,5 @@ export async function applyStrategy(
     throw new Error(`Strategy file not found at path: ${strategyPath}`);
   }
 
-  return executeStrategyFile(strategyPath, sessionId, documentGroupId, args);
+  return executeStrategyFile(strategyPath, documentGroupId, args);
 }
