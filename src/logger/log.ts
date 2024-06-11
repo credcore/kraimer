@@ -1,3 +1,3 @@
-export function log(text: any) {
-  console.log(text);
+export function log(result: any) {
+  console.log(typeof result === "string" ? result : JSON.stringify(result));
 }

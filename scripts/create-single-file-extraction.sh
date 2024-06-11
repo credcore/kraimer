@@ -15,7 +15,7 @@ EXTRACTION_NAME=$5
 
 # Step 1: Create a document
 create_document_output=$(node dist/index.js --print document create --type "$DOCUMENT_TYPE" --file-path "$FILE_PATH" --name "$DOCUMENT_NAME")
-document_id=$(echo "$create_document_output" | grep -o '"id": [0-9]*' | grep -o '[0-9]*')
+document_id=$(echo "$create_document_output" | jq -r '.id')
 
 # Check if document_id is retrieved
 if [ -z "$document_id" ]; then
@@ -27,7 +27,7 @@ echo "Created document with ID: $document_id"
 
 # Step 2: Create a document group
 create_doc_group_output=$(node dist/index.js --print document-group create --name "$DOC_GROUP_NAME")
-doc_group_id=$(echo "$create_doc_group_output" | grep -o '"id": [0-9]*' | grep -o '[0-9]*')
+doc_group_id=$(echo "$create_doc_group_output" | jq -r '.id')
 
 # Check if doc_group_id is retrieved
 if [ -z "$doc_group_id" ]; then
@@ -40,13 +40,23 @@ echo "Created document group with ID: $doc_group_id"
 # Step 3: Add document to the group
 add_doc_output=$(node dist/index.js --print document-group add-document --document-group-id "$doc_group_id" --document-id "$document_id")
 
-# There is no JSON output to parse here as per your description.
-# You may want to add a check for successful addition by examining the output or the exit status.
+# Check if the document was added successfully by examining the exit status
+if [ $? -ne 0 ]; then
+    echo "Failed to add document to the document group."
+    exit 1
+fi
+
 echo "Added document ID $document_id to document group ID $doc_group_id"
 
 # Step 4: Create an extraction
 add_extraction_output=$(node dist/index.js --print extraction create --name "$EXTRACTION_NAME" --document-group-id "$doc_group_id" --status started)
-extraction_id=$(echo "$add_extraction_output" | grep -o '"id": [0-9]*' | grep -o '[0-9]*')
+extraction_id=$(echo "$add_extraction_output" | jq -r '.id')
+
+# Check if extraction_id is retrieved
+if [ -z "$extraction_id" ]; then
+    echo "Failed to create extraction."
+    exit 1
+fi
 
 # Output to the user that the script has finished running.
-echo "Extraction named $EXTRACTION_NAME with id $extraction_id created for document group ID $doc_group_id"
+echo "Extraction named $EXTRACTION_NAME with ID $extraction_id created for document group ID $doc_group_id"

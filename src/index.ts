@@ -42,7 +42,7 @@ import * as db from "./db/index.js";
 
 async function start() {
   await db.init();
-  
+
   const argv = yargs(hideBin(process.argv))
     .option("print", {
       type: "boolean",
@@ -70,6 +70,7 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
@@ -89,10 +90,11 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
-          "get_all",
+          "get-all",
           "Get all documents",
           (yargs) =>
             yargs
@@ -110,10 +112,11 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
-          "add_property",
+          "add-property",
           "Add a property to a document",
           (yargs) =>
             yargs
@@ -125,7 +128,7 @@ async function start() {
           }
         )
         .command(
-          "remove_property",
+          "remove-property",
           "Remove a property from a document",
           (yargs) =>
             yargs
@@ -133,10 +136,11 @@ async function start() {
               .option("name", { type: "string", demandOption: true }),
           async (args) => {
             await removeDocumentProperty(args.documentId, args.name);
+            process.exit(0);
           }
         )
         .command(
-          "get_property",
+          "get-property",
           "Get a property from a document",
           (yargs) =>
             yargs
@@ -150,10 +154,11 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
-          "get_properties",
+          "get-properties",
           "Get properties from a document",
           (yargs) =>
             yargs.option("documentId", { type: "number", demandOption: true }),
@@ -162,12 +167,13 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .demandCommand(1, "Please specify a document subcommand");
     })
     .command(
-      "document_group <subcommand>",
+      "document-group <subcommand>",
       "Manage document groups",
       (yargs) => {
         yargs
@@ -186,6 +192,7 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
@@ -195,6 +202,7 @@ async function start() {
               yargs.option("id", { type: "number", demandOption: true }),
             async (args) => {
               await deleteDocumentGroup(args.id);
+              process.exit(0);
             }
           )
           .command(
@@ -207,10 +215,11 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
-            "get_all",
+            "get-all",
             "Get all document groups",
             (yargs) =>
               yargs
@@ -228,10 +237,11 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
-            "add_property",
+            "add-property",
             "Add a property to a document group",
             (yargs) =>
               yargs
@@ -247,10 +257,11 @@ async function start() {
                 args.name,
                 args.value
               );
+              process.exit(0);
             }
           )
           .command(
-            "remove_property",
+            "remove-property",
             "Remove a property from a document group",
             (yargs) =>
               yargs
@@ -264,10 +275,11 @@ async function start() {
                 args.documentGroupId,
                 args.name
               );
+              process.exit(0);
             }
           )
           .command(
-            "get_property",
+            "get-property",
             "Get a property from a document group",
             (yargs) =>
               yargs
@@ -284,10 +296,11 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
-            "add_document",
+            "add-document",
             "Add a document to a document group",
             (yargs) =>
               yargs
@@ -298,9 +311,10 @@ async function start() {
                 .option("documentId", { type: "number", demandOption: true }),
             async (args) => {
               await addDocumentToGroup(args.documentGroupId, args.documentId);
+              process.exit(0);
             }
           )
-          .demandCommand(1, "Please specify a document_group subcommand");
+          .demandCommand(1, "Please specify a document-group subcommand");
       }
     )
     .command("extraction <subcommand>", "Manage extractions", (yargs) => {
@@ -322,6 +336,7 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
@@ -330,6 +345,7 @@ async function start() {
           (yargs) => yargs.option("id", { type: "number", demandOption: true }),
           async (args) => {
             await deleteExtraction(args.id);
+            process.exit(0);
           }
         )
         .command(
@@ -341,10 +357,11 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
-          "get_all",
+          "get-all",
           "Get all extractions",
           (yargs) =>
             yargs.option("documentGroupId", {
@@ -356,10 +373,11 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
-          "add_property",
+          "add-property",
           "Add a property to an extraction",
           (yargs) =>
             yargs
@@ -372,10 +390,11 @@ async function start() {
               args.name,
               args.value
             );
+            process.exit(0);
           }
         )
         .command(
-          "remove_property",
+          "remove-property",
           "Remove a property from an extraction",
           (yargs) =>
             yargs
@@ -383,10 +402,11 @@ async function start() {
               .option("name", { type: "string", demandOption: true }),
           async (args) => {
             await removeExtractionProperty(args.extractionId, args.name);
+            process.exit(0);
           }
         )
         .command(
-          "get_property",
+          "get-property",
           "Get a property from an extraction",
           (yargs) =>
             yargs
@@ -400,10 +420,11 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
-          "get_documents",
+          "get-documents",
           "Get documents in an extraction",
           (yargs) =>
             yargs.option("extractionId", {
@@ -415,10 +436,11 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .command(
-          "get_properties",
+          "get-properties",
           "Get properties of an extraction",
           (yargs) =>
             yargs.option("extractionId", {
@@ -430,12 +452,13 @@ async function start() {
             if (args.print) {
               log(result);
             }
+            process.exit(0);
           }
         )
         .demandCommand(1, "Please specify an extraction subcommand");
     })
     .command(
-      "extracted_field <subcommand>",
+      "extracted-field <subcommand>",
       "Manage extracted fields",
       (yargs) => {
         yargs
@@ -460,6 +483,7 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
@@ -469,6 +493,7 @@ async function start() {
               yargs.option("id", { type: "number", demandOption: true }),
             async (args) => {
               await deleteExtractedField(args.id);
+              process.exit(0);
             }
           )
           .command(
@@ -481,10 +506,11 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
-            "get_all",
+            "get-all",
             "Get all extracted fields",
             (yargs) =>
               yargs.option("extractionId", {
@@ -496,10 +522,11 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
-            "get_by_name",
+            "get-by-name",
             "Get an extracted field by name",
             (yargs) =>
               yargs
@@ -513,13 +540,14 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
-          .demandCommand(1, "Please specify an extracted_field subcommand");
+          .demandCommand(1, "Please specify an extracted-field subcommand");
       }
     )
     .command(
-      "extracted_field_error <subcommand>",
+      "extracted-field-error <subcommand>",
       "Manage extracted field errors",
       (yargs) => {
         yargs
@@ -545,6 +573,7 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
@@ -566,10 +595,11 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .command(
-            "get_all",
+            "get-all",
             "Get all extracted field errors",
             (yargs) =>
               yargs
@@ -583,11 +613,12 @@ async function start() {
               if (args.print) {
                 log(result);
               }
+              process.exit(0);
             }
           )
           .demandCommand(
             1,
-            "Please specify an extracted_field_error subcommand"
+            "Please specify an extracted-field-error subcommand"
           );
       }
     )
@@ -613,6 +644,7 @@ async function start() {
             }, {} as Record<string, unknown>);
 
             await applyStrategy(args.extractionId, args.strategy, userArgs);
+            process.exit(0);
           }
         )
         .demandCommand(1, "Please specify an extract subcommand");
