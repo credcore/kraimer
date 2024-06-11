@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "build": "rm -rf dist && npx tsc"
+    "build": "rm -rf dist && npx tsc",
+    "db:migrate:make": "knex migrate:make --esm --client postgresql",
+    "db:migrate:latest": "npx knex migrate:latest"
   },
   "bin": {
     "kraimer": "dist/index.js"
@@ -16,9 +18,11 @@
     "url": "git+https://https://github.com/credcore/kraimer-next.git"
   },
   "dependencies": {
+    "@types/knex": "^0.16.1",
     "@types/node": "^20.14.2",
     "@types/pg-promise": "^5.4.3",
     "@types/yargs": "^17.0.32",
+    "knex": "^3.1.0",
     "pg-promise": "^11.8.0",
     "yargs": "^17.7.2"
   },
