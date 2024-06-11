@@ -471,6 +471,7 @@ async function start() {
                 .option("extractionId", { type: "number", demandOption: true })
                 .option("name", { type: "string", demandOption: true })
                 .option("value", { type: "string", demandOption: true })
+                .option("session", { type: "string", demandOption: true })
                 .option("strategy", { type: "string", demandOption: true })
                 .option("status", { type: "string", demandOption: true }),
             async (args) => {
@@ -478,6 +479,7 @@ async function start() {
                 args.extractionId,
                 args.name,
                 args.value,
+                args.session,
                 args.strategy,
                 args.status as TaskStatusEnum
               );

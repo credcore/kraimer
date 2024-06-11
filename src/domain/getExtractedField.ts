@@ -5,7 +5,7 @@ export async function getExtractedField(id: number): Promise<ExtractedField> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
-      SELECT id, extraction_id, name, value, strategy, status, created_at
+      SELECT id, extraction_id, name, value, strategy, status, session, created_at
       FROM extracted_field
       WHERE id = $<id>
     `,
@@ -23,6 +23,7 @@ export async function getExtractedField(id: number): Promise<ExtractedField> {
     value: result.value,
     strategy: result.strategy,
     status: result.status,
+    session: result.session,
     createdAt: result.created_at,
   };
 }

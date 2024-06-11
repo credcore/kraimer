@@ -47,6 +47,7 @@ export type ExtractedField = {
   value: string;
   strategy: string;
   status: TaskStatusEnum;
+  session: string;
   createdAt: Date;
 };
 

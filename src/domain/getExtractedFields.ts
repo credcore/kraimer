@@ -7,7 +7,7 @@ export async function getExtractedFields(
   const db = getDb();
   const results = await db.manyOrNone(
     `
-      SELECT id, extraction_id, name, value, strategy, status, created_at
+      SELECT id, extraction_id, name, value, strategy, status, session, created_at
       FROM extracted_field
       WHERE extraction_id = $<extractionId>
       ORDER BY id ASC
@@ -22,6 +22,7 @@ export async function getExtractedFields(
     value: field.value,
     strategy: field.strategy,
     status: field.status,
+    session: field.session,
     createdAt: field.created_at,
   }));
 }
