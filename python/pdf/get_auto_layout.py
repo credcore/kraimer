@@ -1,8 +1,8 @@
+import argparse
+import json
 from typing import Any, List, Tuple, TypedDict
 
 import pdfplumber
-
-from settings import global_settings
 
 BoundingBox = Tuple[float, float, float, float]
 
@@ -28,12 +28,24 @@ class DocumentStructure(TypedDict):
     pages: List[PageData]
 
 
-def get_auto_layout(pdf_path: str) -> DocumentStructure:
+def get_auto_layout(
+    pdf_path: str,
+    start_page: int,
+    end_page: int,
+    x_tolerance: int,
+    y_tolerance: int,
+    y_density: int,
+) -> DocumentStructure:
     """
     Extract text and bounding box information from a given PDF.
 
     Args:
     - pdf_path (str): Path to the PDF file.
+    - start_page (int): Page to start extracting from.
+    - end_page (int): Page to end extracting at.
+    - x_tolerance (int): Tolerance for x-coordinate.
+    - y_tolerance (int): Tolerance for y-coordinate.
+    - y_density (int): Density for y-coordinate.
 
     Returns:
     - Dict: Structured data organized by pages.
@@ -41,12 +53,6 @@ def get_auto_layout(pdf_path: str) -> DocumentStructure:
     pdf = pdfplumber.open(pdf_path)
 
     output = {"pages": []}
-
-    start_page = global_settings.get("args_pdf_start_page") or 1
-    end_page = global_settings.get("args_pdf_end_page") or len(pdf.pages)
-    x_tolerance = global_settings.get("args_pdf_x_tolerance") or 3
-    y_tolerance = global_settings.get("args_pdf_y_tolerance") or 3
-    y_density = global_settings.get("args_pdf_y_density") or 10
 
     # Ensure start_page and end_page are within the valid range
     start_page = max(1, min(start_page, len(pdf.pages)))
@@ -94,3 +100,40 @@ def get_auto_layout(pdf_path: str) -> DocumentStructure:
         )
 
     return output
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Extract text and bounding box information from a PDF."
+    )
+    parser.add_argument("pdf_path", type=str, help="Path to the PDF file")
+    parser.add_argument(
+        "--start_page", type=int, default=1, help="Page to start extracting from"
+    )
+    parser.add_argument("--end_page", type=int, help="Page to end extracting at")
+    parser.add_argument(
+        "--x_tolerance", type=int, default=3, help="Tolerance for x-coordinate"
+    )
+    parser.add_argument(
+        "--y_tolerance", type=int, default=3, help="Tolerance for y-coordinate"
+    )
+    parser.add_argument(
+        "--y_density", type=int, default=10, help="Density for y-coordinate"
+    )
+
+    args = parser.parse_args()
+
+    document_structure = get_auto_layout(
+        pdf_path=args.pdf_path,
+        start_page=args.start_page,
+        end_page=(
+            args.end_page
+            if args.end_page
+            else len(pdfplumber.open(args.pdf_path).pages)
+        ),
+        x_tolerance=args.x_tolerance,
+        y_tolerance=args.y_tolerance,
+        y_density=args.y_density,
+    )
+
+    print(json.dumps(document_structure, indent=4))

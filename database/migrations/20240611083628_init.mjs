@@ -6,15 +6,15 @@ export function up(knex) {
   return knex.schema
     .createTable("file_content", function (table) {
       table.bigIncrements("id").primary();
-      table.string("file_path").notNullable();
+      table.text("file_path").notNullable();
       table.binary("content").notNullable();
-      table.string("content_type").notNullable();
+      table.text("content_type").notNullable();
     })
     .createTable("document", function (table) {
       table.bigIncrements("id").primary();
-      table.string("name").unique();
-      table.string("description");
-      table.string("type");
+      table.text("name").unique();
+      table.text("description");
+      table.text("type");
       table.timestamp("created_at").defaultTo(knex.fn.now());
       table
         .bigInteger("file_content_id")
@@ -23,8 +23,8 @@ export function up(knex) {
     })
     .createTable("document_group", function (table) {
       table.bigIncrements("id").primary();
-      table.string("name").unique();
-      table.string("description");
+      table.text("name").unique();
+      table.text("description");
       table.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("document_group_document", function (table) {
@@ -38,8 +38,8 @@ export function up(knex) {
     .createTable("document_property", function (table) {
       table.bigIncrements("id").primary();
       table.bigInteger("document_id").references("id").inTable("document");
-      table.string("name");
-      table.string("value");
+      table.text("name");
+      table.text("value");
       table.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("document_group_property", function (table) {
@@ -48,8 +48,8 @@ export function up(knex) {
         .bigInteger("document_group_id")
         .references("id")
         .inTable("document_group");
-      table.string("name");
-      table.string("value");
+      table.text("name");
+      table.text("value");
       table.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("extraction", function (table) {
@@ -58,25 +58,25 @@ export function up(knex) {
         .bigInteger("document_group_id")
         .references("id")
         .inTable("document_group");
-      table.string("name").unique();
-      table.string("status");
+      table.text("name").unique();
+      table.text("status");
       table.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("extracted_field", function (table) {
       table.bigIncrements("id").primary();
       table.bigInteger("extraction_id").references("id").inTable("extraction");
-      table.string("name");
-      table.string("value");
-      table.string("strategy");
-      table.string("status");
+      table.text("name");
+      table.text("value");
+      table.text("strategy");
+      table.text("status");
       table.timestamp("created_at").defaultTo(knex.fn.now());
       table.unique(["extraction_id", "name"]);
     })
     .createTable("extraction_property", function (table) {
       table.bigIncrements("id").primary();
       table.bigInteger("extraction_id").references("id").inTable("extraction");
-      table.string("name");
-      table.string("value");
+      table.text("name");
+      table.text("value");
       table.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("extracted_field_error", function (table) {
@@ -85,23 +85,23 @@ export function up(knex) {
         .bigInteger("extracted_field_id")
         .references("id")
         .inTable("extracted_field");
-      table.string("message");
-      table.string("data");
+      table.text("message");
+      table.text("data");
       table.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("llm_response", function (table) {
       table.bigIncrements("id").primary();
-      table.string("llm");
-      table.string("model");
-      table.string("prompt_hash");
+      table.text("llm");
+      table.text("model");
+      table.text("prompt_hash");
       table.text("prompt");
-      table.string("response_id");
+      table.text("response_id");
       table.text("response");
-      table.string("finish_reason");
+      table.text("finish_reason");
       table.integer("prompt_tokens");
       table.integer("completion_tokens");
       table.integer("total_tokens");
-      table.string("error");
+      table.text("error");
       table.timestamp("created_at").defaultTo(knex.fn.now());
       table.unique(["prompt_hash", "model", "llm"]);
     });

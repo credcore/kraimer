@@ -638,7 +638,7 @@ async function start() {
 
             // Extract user-defined arguments
             const userArgs = Object.keys(args).reduce((obj, key) => {
-              if (!predefinedKeys.includes(key)) {
+              if (!predefinedKeys.includes(key) && !key.includes("-")) {
                 obj[key] = args[key];
               }
               return obj;
@@ -649,6 +649,9 @@ async function start() {
           }
         )
         .demandCommand(1, "Please specify an extract subcommand");
+    })
+    .parserConfiguration({
+      "camel-case-expansion": true,
     })
     .demandCommand()
     .help().argv;
