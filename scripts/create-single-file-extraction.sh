@@ -1,6 +1,18 @@
 #!/bin/bash
 
-source ../.env
+# Change to the directory of the script
+cd "$(dirname "$0")"
+
+# Function to parse .env file
+parse_env() {
+    if [ ! -f "$1" ]; then
+        echo "Error: .env file not found at $1"
+        exit 1
+    fi
+    export $(cat $1 | xargs)
+}
+
+parse_env "../.env"
 
 # Check if the correct number of arguments are given
 if [ "$#" -ne 5 ]; then
@@ -15,8 +27,11 @@ DOCUMENT_NAME=$3
 DOC_GROUP_NAME=$4
 EXTRACTION_NAME=$5
 
+# Store the node command in a variable for reuse
+NODE_CMD="node ../dist/index.js --print"
+
 # Step 1: Create a document
-create_document_output=$(node dist/index.js --print document create --type "$DOCUMENT_TYPE" --file-path "$FILE_PATH" --name "$DOCUMENT_NAME")
+create_document_output=$($NODE_CMD document create --type "$DOCUMENT_TYPE" --file-path "$FILE_PATH" --name "$DOCUMENT_NAME")
 document_id=$(echo "$create_document_output" | jq -r '.id')
 
 # Check if document_id is retrieved
@@ -28,7 +43,7 @@ fi
 echo "Created document with ID: $document_id"
 
 # Step 2: Create a document group
-create_doc_group_output=$(node dist/index.js --print document-group create --name "$DOC_GROUP_NAME")
+create_doc_group_output=$($NODE_CMD document-group create --name "$DOC_GROUP_NAME")
 doc_group_id=$(echo "$create_doc_group_output" | jq -r '.id')
 
 # Check if doc_group_id is retrieved
@@ -40,7 +55,7 @@ fi
 echo "Created document group with ID: $doc_group_id"
 
 # Step 3: Add document to the group
-add_doc_output=$(node dist/index.js --print document-group add-document --document-group-id "$doc_group_id" --document-id "$document_id")
+add_doc_output=$($NODE_CMD document-group add-document --document-group-id "$doc_group_id" --document-id "$document_id")
 
 # Check if the document was added successfully by examining the exit status
 if [ $? -ne 0 ]; then
@@ -51,7 +66,7 @@ fi
 echo "Added document ID $document_id to document group ID $doc_group_id"
 
 # Step 4: Create an extraction
-add_extraction_output=$(node dist/index.js --print extraction create --name "$EXTRACTION_NAME" --document-group-id "$doc_group_id" --status started)
+add_extraction_output=$($NODE_CMD extraction create --name "$EXTRACTION_NAME" --document-group-id "$doc_group_id" --status started)
 extraction_id=$(echo "$add_extraction_output" | jq -r '.id')
 
 # Check if extraction_id is retrieved
