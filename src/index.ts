@@ -1,8 +1,6 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-import { readFileSync } from "fs";
-import path from "path";
 import { addDocumentGroupProperty } from "./domain/addDocumentGroupProperty.js";
 import { addDocumentProperty } from "./domain/addDocumentProperty.js";
 import { addDocumentToGroup } from "./domain/addDocumentToGroup.js";
@@ -39,18 +37,8 @@ import { OrderByEnum, TaskStatusEnum } from "./domain/types.js";
 import { log } from "./logger/log.js";
 import { applyStrategy } from "./strategy/applyStrategy.js";
 
-function getPackageVersion(): string {
-  const pkg = path.join(__dirname, "../package.json");
-  const packageJSON = JSON.parse(readFileSync(pkg, "utf8"));
-  return packageJSON.version;
-}
-
 async function start() {
   const argv = yargs(hideBin(process.argv))
-    // Version command
-    .command("version", "Show application version", {}, () => {
-      log(getPackageVersion());
-    })
     // Document commands
     .command(
       "document create",
@@ -61,8 +49,8 @@ async function start() {
           .option("description", { type: "string" })
           .option("type", { type: "string", demandOption: true })
           .option("filePath", { type: "string", demandOption: true }),
-      (args) => {
-        const result = createDocument(
+      async (args) => {
+        const result = await createDocument(
           args.name,
           args.description ?? "",
           args.type,
@@ -77,16 +65,16 @@ async function start() {
       "document delete",
       "Delete a document",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        deleteDocument(args.id);
+      async (args) => {
+        await deleteDocument(args.id);
       }
     )
     .command(
       "document get",
       "Get a document",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getDocument(args.id);
+      async (args) => {
+        const result = await getDocument(args.id);
         if (args.printOutput) {
           log(result);
         }
@@ -104,8 +92,8 @@ async function start() {
             type: "string",
             default: "ASC",
           }),
-      (args) => {
-        const result = getDocuments(
+      async (args) => {
+        const result = await getDocuments(
           args.startFrom,
           args.count,
           { name: args.filterName },
@@ -124,8 +112,8 @@ async function start() {
           .option("documentId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true })
           .option("value", { type: "string", demandOption: true }),
-      (args) => {
-        addDocumentProperty(args.documentId, args.name, args.value);
+      async (args) => {
+        await addDocumentProperty(args.documentId, args.name, args.value);
       }
     )
     .command(
@@ -135,8 +123,8 @@ async function start() {
         yargs
           .option("documentId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true }),
-      (args) => {
-        removeDocumentProperty(args.documentId, args.name);
+      async (args) => {
+        await removeDocumentProperty(args.documentId, args.name);
       }
     )
     .command(
@@ -146,8 +134,8 @@ async function start() {
         yargs
           .option("documentId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true }),
-      (args) => {
-        const result = getDocumentProperty(args.documentId, args.name);
+      async (args) => {
+        const result = await getDocumentProperty(args.documentId, args.name);
         if (args.printOutput) {
           log(result);
         }
@@ -158,8 +146,8 @@ async function start() {
       "Get properties from a document",
       (yargs) =>
         yargs.option("documentId", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getDocumentProperties(args.documentId);
+      async (args) => {
+        const result = await getDocumentProperties(args.documentId);
         if (args.printOutput) {
           log(result);
         }
@@ -173,8 +161,11 @@ async function start() {
         yargs
           .option("name", { type: "string", demandOption: true })
           .option("description", { type: "string" }),
-      (args) => {
-        const result = createDocumentGroup(args.name, args.description ?? "");
+      async (args) => {
+        const result = await createDocumentGroup(
+          args.name,
+          args.description ?? ""
+        );
         if (args.printOutput) {
           log(result);
         }
@@ -184,16 +175,16 @@ async function start() {
       "document_group delete",
       "Delete a document group",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        deleteDocumentGroup(args.id);
+      async (args) => {
+        await deleteDocumentGroup(args.id);
       }
     )
     .command(
       "document_group get",
       "Get a document group",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getDocumentGroup(args.id);
+      async (args) => {
+        const result = await getDocumentGroup(args.id);
         if (args.printOutput) {
           log(result);
         }
@@ -211,8 +202,8 @@ async function start() {
             type: "string",
             default: "ASC",
           }),
-      (args) => {
-        const result = getDocumentGroups(
+      async (args) => {
+        const result = await getDocumentGroups(
           args.startFrom,
           args.count,
           { name: args.filterName },
@@ -231,8 +222,12 @@ async function start() {
           .option("documentGroupId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true })
           .option("value", { type: "string", demandOption: true }),
-      (args) => {
-        addDocumentGroupProperty(args.documentGroupId, args.name, args.value);
+      async (args) => {
+        await addDocumentGroupProperty(
+          args.documentGroupId,
+          args.name,
+          args.value
+        );
       }
     )
     .command(
@@ -242,8 +237,8 @@ async function start() {
         yargs
           .option("documentGroupId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true }),
-      (args) => {
-        removeDocumentGroupProperty(args.documentGroupId, args.name);
+      async (args) => {
+        await removeDocumentGroupProperty(args.documentGroupId, args.name);
       }
     )
     .command(
@@ -253,8 +248,8 @@ async function start() {
         yargs
           .option("documentGroupId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true }),
-      (args) => {
-        const result = getDocumentGroupProperty(
+      async (args) => {
+        const result = await getDocumentGroupProperty(
           args.documentGroupId,
           args.name
         );
@@ -270,8 +265,8 @@ async function start() {
         yargs
           .option("documentGroupId", { type: "number", demandOption: true })
           .option("documentId", { type: "number", demandOption: true }),
-      (args) => {
-        addDocumentToGroup(args.documentGroupId, args.documentId);
+      async (args) => {
+        await addDocumentToGroup(args.documentGroupId, args.documentId);
       }
     )
     // Extraction commands
@@ -286,8 +281,8 @@ async function start() {
             type: "string",
             demandOption: true,
           }),
-      (args) => {
-        const result = createExtraction(
+      async (args) => {
+        const result = await createExtraction(
           args.documentGroupId,
           args.name,
           args.status as TaskStatusEnum
@@ -301,16 +296,16 @@ async function start() {
       "extraction delete",
       "Delete an extraction",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        deleteExtraction(args.id);
+      async (args) => {
+        await deleteExtraction(args.id);
       }
     )
     .command(
       "extraction get",
       "Get an extraction",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getExtraction(args.id);
+      async (args) => {
+        const result = await getExtraction(args.id);
         if (args.printOutput) {
           log(result);
         }
@@ -321,8 +316,8 @@ async function start() {
       "Get all extractions",
       (yargs) =>
         yargs.option("documentGroupId", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getExtractions(args.documentGroupId);
+      async (args) => {
+        const result = await getExtractions(args.documentGroupId);
         if (args.printOutput) {
           log(result);
         }
@@ -336,8 +331,8 @@ async function start() {
           .option("extractionId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true })
           .option("value", { type: "string", demandOption: true }),
-      (args) => {
-        addExtractionProperty(args.extractionId, args.name, args.value);
+      async (args) => {
+        await addExtractionProperty(args.extractionId, args.name, args.value);
       }
     )
     .command(
@@ -347,8 +342,8 @@ async function start() {
         yargs
           .option("extractionId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true }),
-      (args) => {
-        removeExtractionProperty(args.extractionId, args.name);
+      async (args) => {
+        await removeExtractionProperty(args.extractionId, args.name);
       }
     )
     .command(
@@ -358,8 +353,11 @@ async function start() {
         yargs
           .option("extractionId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true }),
-      (args) => {
-        const result = getExtractionProperty(args.extractionId, args.name);
+      async (args) => {
+        const result = await getExtractionProperty(
+          args.extractionId,
+          args.name
+        );
         if (args.printOutput) {
           log(result);
         }
@@ -379,8 +377,8 @@ async function start() {
             type: "string",
             demandOption: true,
           }),
-      (args) => {
-        const result = createExtractedField(
+      async (args) => {
+        const result = await createExtractedField(
           args.extractionId,
           args.name,
           args.value,
@@ -396,16 +394,16 @@ async function start() {
       "extracted_field delete",
       "Delete an extracted field",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        deleteExtractedField(args.id);
+      async (args) => {
+        await deleteExtractedField(args.id);
       }
     )
     .command(
       "extracted_field get",
       "Get an extracted field",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getExtractedField(args.id);
+      async (args) => {
+        const result = await getExtractedField(args.id);
         if (args.printOutput) {
           log(result);
         }
@@ -416,8 +414,8 @@ async function start() {
       "Get all extracted fields",
       (yargs) =>
         yargs.option("extractionId", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getExtractedFields(args.extractionId);
+      async (args) => {
+        const result = await getExtractedFields(args.extractionId);
         if (args.printOutput) {
           log(result);
         }
@@ -430,8 +428,11 @@ async function start() {
         yargs
           .option("extractionId", { type: "number", demandOption: true })
           .option("name", { type: "string", demandOption: true }),
-      (args) => {
-        const result = getExtractedFieldByName(args.extractionId, args.name);
+      async (args) => {
+        const result = await getExtractedFieldByName(
+          args.extractionId,
+          args.name
+        );
         if (args.printOutput) {
           log(result);
         }
@@ -447,8 +448,8 @@ async function start() {
           .option("extractedFieldId", { type: "number", demandOption: true })
           .option("message", { type: "string", demandOption: true })
           .option("data", { type: "string", demandOption: true }),
-      (args) => {
-        const result = createExtractedFieldError(
+      async (args) => {
+        const result = await createExtractedFieldError(
           args.extractionId,
           args.extractedFieldId,
           args.message,
@@ -463,16 +464,16 @@ async function start() {
       "extracted_field_error delete",
       "Delete an extracted field error",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        deleteExtractedFieldError(args.id);
+      async (args) => {
+        await deleteExtractedFieldError(args.id);
       }
     )
     .command(
       "extracted_field_error get",
       "Get an extracted field error",
       (yargs) => yargs.option("id", { type: "number", demandOption: true }),
-      (args) => {
-        const result = getExtractedFieldError(args.id);
+      async (args) => {
+        const result = await getExtractedFieldError(args.id);
         if (args.printOutput) {
           log(result);
         }
@@ -485,8 +486,8 @@ async function start() {
         yargs
           .option("extractionId", { type: "number", demandOption: true })
           .option("extractedFieldId", { type: "number" }),
-      (args) => {
-        const result = getExtractedFieldErrors(
+      async (args) => {
+        const result = await getExtractedFieldErrors(
           args.extractionId,
           args.extractedFieldId
         );
@@ -503,7 +504,7 @@ async function start() {
         yargs
           .option("extractionId", { type: "number", demandOption: true })
           .option("strategy", { type: "string", demandOption: true }),
-      (args) => {
+      async (args) => {
         // Predefined keys
         const predefinedKeys = ["_", "$0", "extractionId", "strategy"];
 
@@ -515,7 +516,7 @@ async function start() {
           return obj;
         }, {} as Record<string, unknown>);
 
-        applyStrategy(args.extractionId, args.strategy, userArgs);
+        await applyStrategy(args.extractionId, args.strategy, userArgs);
       }
     )
     .demandCommand()
