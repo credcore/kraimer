@@ -7,7 +7,7 @@ export async function createExtraction(
   name: string,
   status: TaskStatusEnum
 ): Promise<Extraction> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.one(
     `
       INSERT INTO extraction (document_group_id, name, status)

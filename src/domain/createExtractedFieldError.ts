@@ -8,7 +8,7 @@ export async function createExtractedFieldError(
   message: string,
   data: string
 ): Promise<ExtractedFieldError> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.one(
     `
       INSERT INTO extracted_field_error (extraction_id, extracted_field_id, message, data)

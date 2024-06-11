@@ -5,7 +5,7 @@ import { Document } from "./types.js";
 export async function getDocumentsInExtraction(
   extractionId: number
 ): Promise<Document[]> {
-  const db = getDb();
+  const db = await getDb();
   const results = await db.manyOrNone(
     `
       SELECT d.id, d.name, d.description, d.type, d.file_content_id, d.created_at
@@ -18,6 +18,7 @@ export async function getDocumentsInExtraction(
   );
 
   const documents: Document[] = [];
+  
   for (const result of results) {
     const document: Document = {
       id: result.id,

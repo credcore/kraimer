@@ -6,7 +6,7 @@ export async function createDocumentGroup(
   name: string,
   description: string
 ): Promise<DocumentGroup> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.one(
     `
       INSERT INTO document_group (name, description)

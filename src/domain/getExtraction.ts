@@ -3,7 +3,7 @@ import { getExtractionProperties } from "./getExtractionProperties.js";
 import { Extraction } from "./types.js";
 
 export async function getExtraction(id: number): Promise<Extraction> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, document_group_id, name, status, created_at

@@ -12,7 +12,7 @@ export async function getDocumentGroups(
   filter: DocumentGroupFilter = {},
   orderBy: OrderByEnum = "ASC"
 ): Promise<DocumentGroup[]> {
-  const db = getDb();
+  const db = await getDb();
   let query = `
     SELECT id, name, description, created_at
     FROM document_group

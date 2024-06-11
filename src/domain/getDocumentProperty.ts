@@ -5,7 +5,7 @@ export async function getDocumentProperty(
   documentId: number,
   name: string
 ): Promise<DocumentProperty> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, document_id, name, value, created_at

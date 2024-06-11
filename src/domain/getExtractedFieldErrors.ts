@@ -5,7 +5,7 @@ export async function getExtractedFieldErrors(
   extractionId: number,
   extractedFieldId?: number
 ): Promise<ExtractedFieldError[]> {
-  const db = getDb();
+  const db = await getDb();
   let query = `
     SELECT id, extraction_id, extracted_field_id, message, data, created_at
     FROM extracted_field_error

@@ -1,7 +1,7 @@
 import { getDb } from "../db/index.js";
 
 export async function removeDocumentGroupProperty(documentGroupId: number, name: string): Promise<void> {
-  const db = getDb();
+  const db = await getDb();
   await db.none(
     `
       DELETE FROM document_group_property

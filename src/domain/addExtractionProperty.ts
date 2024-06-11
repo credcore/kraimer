@@ -7,7 +7,7 @@ export async function addExtractionProperty(
   name: string,
   value: string
 ): Promise<ExtractionProperty> {
-  const db = getDb();
+  const db = await getDb();
   await db.none(
     `
       INSERT INTO extraction_property (extraction_id, name, value)

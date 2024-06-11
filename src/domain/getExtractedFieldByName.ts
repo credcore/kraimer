@@ -5,7 +5,7 @@ export async function getExtractedFieldByName(
   extractionId: number,
   name: string
 ): Promise<ExtractedField> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, extraction_id, name, value, strategy, status, created_at

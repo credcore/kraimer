@@ -4,7 +4,7 @@ import { ExtractedFieldError } from "./types.js";
 export async function getExtractedFieldError(
   id: number
 ): Promise<ExtractedFieldError> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, extraction_id, extracted_field_id, message, data, created_at

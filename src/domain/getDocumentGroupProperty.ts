@@ -5,7 +5,7 @@ export async function getDocumentGroupProperty(
   documentGroupId: number,
   name: string
 ): Promise<DocumentGroupProperty> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, document_group_id, name, value, created_at

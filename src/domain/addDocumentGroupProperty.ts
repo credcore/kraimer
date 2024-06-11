@@ -7,7 +7,7 @@ export async function addDocumentGroupProperty(
   name: string,
   value: string
 ): Promise<DocumentGroupProperty> {
-  const db = getDb();
+  const db = await getDb();
   await db.none(
     `
       INSERT INTO document_group_property (document_group_id, name, value)

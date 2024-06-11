@@ -7,7 +7,7 @@ export async function addDocumentProperty(
   name: string,
   value: string
 ): Promise<DocumentProperty> {
-  const db = getDb();
+  const db = await getDb();
   await db.none(
     `
       INSERT INTO document_property (document_id, name, value)

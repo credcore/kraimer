@@ -4,7 +4,7 @@ import { ExtractedField } from "./types.js";
 export async function getExtractedFields(
   extractionId: number
 ): Promise<ExtractedField[]> {
-  const db = getDb();
+  const db = await getDb();
   const results = await db.manyOrNone(
     `
       SELECT id, extraction_id, name, value, strategy, status, created_at

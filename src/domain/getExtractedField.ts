@@ -2,7 +2,7 @@ import { getDb } from "../db/index.js";
 import { ExtractedField } from "./types.js";
 
 export async function getExtractedField(id: number): Promise<ExtractedField> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, extraction_id, name, value, strategy, status, created_at

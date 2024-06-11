@@ -9,7 +9,7 @@ export async function createDocument(
   type: string,
   filePath: string
 ): Promise<Document> {
-  const db = getDb();
+  const db = await getDb();
   const content = await fs.readFile(filePath);
 
   const fileContentResult = await db.one(

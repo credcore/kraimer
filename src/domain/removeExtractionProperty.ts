@@ -1,7 +1,7 @@
 import { getDb } from "../db/index.js";
 
 export async function removeExtractionProperty(extractionId: number, name: string): Promise<void> {
-  const db = getDb();
+  const db = await getDb();
   await db.none(
     `
       DELETE FROM extraction_property

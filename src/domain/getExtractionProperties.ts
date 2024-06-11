@@ -4,7 +4,7 @@ import { ExtractionProperty } from "./types.js";
 export async function getExtractionProperties(
   extractionId: number
 ): Promise<ExtractionProperty[]> {
-  const db = getDb();
+  const db = await getDb();
   const results = await db.manyOrNone(
     `
       SELECT id, extraction_id, name, value, created_at

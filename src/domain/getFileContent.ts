@@ -1,9 +1,6 @@
-import * as fs from "fs/promises";
-import * as os from "os";
-import * as path from "path";
 import { getDb } from "../db/index.js";
 
-export async function saveFileContent(documentId: number): Promise<string> {
+export async function getFileContent(documentId: number): Promise<Buffer> {
   const db = await getDb();
   const documentResult = await db.oneOrNone(
     `
@@ -31,8 +28,5 @@ export async function saveFileContent(documentId: number): Promise<string> {
     throw new Error(`No file content found with id: ${documentResult.file_content_id}`);
   }
 
-  const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}.tmp`);
-  await fs.writeFile(tempFilePath, fileContentResult.content);
-
-  return tempFilePath;
+  return fileContentResult.content;
 }

@@ -4,7 +4,7 @@ import { DocumentProperty } from "./types.js";
 export async function getDocumentProperties(
   documentId: number
 ): Promise<DocumentProperty[]> {
-  const db = getDb();
+  const db = await getDb();
   const results = await db.manyOrNone(
     `
       SELECT id, document_id, name, value, created_at

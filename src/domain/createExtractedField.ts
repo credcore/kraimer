@@ -9,7 +9,7 @@ export async function createExtractedField(
   strategy: string,
   status: TaskStatusEnum
 ): Promise<ExtractedField> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.one(
     `
       INSERT INTO extracted_field (extraction_id, name, value, strategy, status)

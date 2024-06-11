@@ -12,7 +12,7 @@ export async function getDocuments(
   filter: DocumentFilter = {},
   orderBy: OrderByEnum = "ASC"
 ): Promise<Document[]> {
-  const db = getDb();
+  const db = await getDb();
   let query = `
     SELECT id, name, description, type, file_content_id, created_at
     FROM document

@@ -4,7 +4,7 @@ export async function addDocumentToGroup(
   documentGroupId: number,
   documentId: number
 ): Promise<void> {
-  const db = getDb();
+  const db = await getDb();
   await db.none(
     `
       INSERT INTO document_group_document (document_group_id, document_id)

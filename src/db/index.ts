@@ -17,6 +17,9 @@ export async function init() {
   db = pgp(connection);
 }
 
-export function getDb() {
+export async function getDb() {
+  if (!db) {
+    await init();
+  }
   return db;
 }

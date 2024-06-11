@@ -5,7 +5,7 @@ export async function getExtractionProperty(
   extractionId: number,
   name: string
 ): Promise<ExtractionProperty> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, extraction_id, name, value, created_at

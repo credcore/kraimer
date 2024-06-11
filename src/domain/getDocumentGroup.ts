@@ -3,7 +3,7 @@ import { getDocument } from "./getDocument.js";
 import { DocumentGroup } from "./types.js";
 
 export async function getDocumentGroup(id: number): Promise<DocumentGroup> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, name, description, created_at

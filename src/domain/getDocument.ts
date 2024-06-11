@@ -3,7 +3,7 @@ import { getDocumentProperties } from "./getDocumentProperties.js";
 import { Document } from "./types.js";
 
 export async function getDocument(id: number): Promise<Document> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.oneOrNone(
     `
       SELECT id, name, description, type, file_content_id, created_at

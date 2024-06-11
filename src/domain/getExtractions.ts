@@ -5,7 +5,7 @@ import { Extraction } from "./types.js";
 export async function getExtractions(
   documentGroupId: number
 ): Promise<Extraction[]> {
-  const db = getDb();
+  const db = await getDb();
   const results = await db.manyOrNone(
     `
       SELECT id, document_group_id, name, status, created_at
