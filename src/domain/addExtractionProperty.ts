@@ -1,6 +1,6 @@
 import { getDb } from "../db/index.js";
-import { ExtractionProperty } from "./ExtractionProperty.js";
 import { getExtractionProperty } from "./getExtractionProperty.js";
+import { ExtractionProperty } from "./types.js";
 
 export async function addExtractionProperty(
   extractionId: number,

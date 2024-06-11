@@ -70,3 +70,13 @@ export async function getDocumentGroups(
       { id: result.id }
     );
 
+    const documentPromises = documentResults.map((doc) =>
+      getDocument(doc.document_id)
+    );
+    documentGroup.documents = await Promise.all(documentPromises);
+
+    documentGroups.push(documentGroup);
+  }
+
+  return documentGroups;
+}

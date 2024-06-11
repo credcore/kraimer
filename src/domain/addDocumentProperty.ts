@@ -1,6 +1,6 @@
 import { getDb } from "../db/index.js";
-import { DocumentProperty } from "./DocumentProperty.js";
 import { getDocumentProperty } from "./getDocumentProperty.js";
+import { DocumentProperty } from "./types.js";
 
 export async function addDocumentProperty(
   documentId: number,

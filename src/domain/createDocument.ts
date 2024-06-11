@@ -1,6 +1,7 @@
 import { getDb } from "../db/index.js";
-import { Document } from "./Document.js";
 import { getDocument } from "./getDocument.js";
+import { Document } from "./types.js";
+import { promises as fs } from "fs";
 
 export async function createDocument(
   name: string,
@@ -9,7 +10,7 @@ export async function createDocument(
   filePath: string
 ): Promise<Document> {
   const db = getDb();
-  const content = await fs.promises.readFile(filePath);
+  const content = await fs.readFile(filePath);
 
   const fileContentResult = await db.one(
     `

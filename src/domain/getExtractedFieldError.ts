@@ -1,7 +1,9 @@
 import { getDb } from "../db/index.js";
-import { ExtractedFieldError } from "./ExtractedFieldError.js";
+import { ExtractedFieldError } from "./types.js";
 
-export async function getExtractedFieldError(id: number): Promise<ExtractedFieldError | null> {
+export async function getExtractedFieldError(
+  id: number
+): Promise<ExtractedFieldError> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
@@ -13,15 +15,14 @@ export async function getExtractedFieldError(id: number): Promise<ExtractedField
   );
 
   if (!result) {
-    return null;
+    throw new Error(`Cannot find ExtractedFieldError with id ${id}`);
   }
 
-  return new ExtractedFieldError(
-    result.id,
-    result.extraction_id,
-    result.extracted_field_id,
-    result.message,
-    result.data,
-    result.created_at
-  );
+  return {
+    id: result.id,
+    extractedFieldId: result.extracted_field_id,
+    message: result.message,
+    data: result.data,
+    createdAt: result.created_at,
+  };
 }

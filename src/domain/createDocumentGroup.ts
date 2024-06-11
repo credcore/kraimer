@@ -1,6 +1,6 @@
 import { getDb } from "../db/index.js";
-import { DocumentGroup } from "./DocumentGroup.js";
 import { getDocumentGroup } from "./getDocumentGroup.js";
+import { DocumentGroup } from "./types.js";
 
 export async function createDocumentGroup(
   name: string,

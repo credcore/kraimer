@@ -1,6 +1,6 @@
 import { getDb } from "../db/index.js";
-import { ExtractedFieldError } from "./ExtractedFieldError.js";
 import { getExtractedFieldError } from "./getExtractedFieldError.js";
+import { ExtractedFieldError } from "./types.js";
 
 export async function createExtractedFieldError(
   extractionId: number,

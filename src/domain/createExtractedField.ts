@@ -1,7 +1,7 @@
 import { getDb } from "../db/index.js";
-import { ExtractedField } from "./ExtractedField.js";
-import { getExtractedField } from "./getExtractedField.js";
 import { TaskStatusEnum } from "./TaskStatusEnum.js";
+import { getExtractedField } from "./getExtractedField.js";
+import { ExtractedField } from "./types.js";
 
 export async function createExtractedField(
   extractionId: number,

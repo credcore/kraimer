@@ -1,6 +1,6 @@
 import { getDb } from "../db/index.js";
-import { DocumentGroupProperty } from "./DocumentGroupProperty.js";
 import { getDocumentGroupProperty } from "./getDocumentGroupProperty.js";
+import { DocumentGroupProperty } from "./types.js";
 
 export async function addDocumentGroupProperty(
   documentGroupId: number,

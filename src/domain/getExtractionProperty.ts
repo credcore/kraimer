@@ -1,10 +1,10 @@
 import { getDb } from "../db/index.js";
-import { ExtractionProperty } from "./ExtractionProperty.js";
+import { ExtractionProperty } from "./types.js";
 
 export async function getExtractionProperty(
   extractionId: number,
   name: string
-): Promise<ExtractionProperty | null> {
+): Promise<ExtractionProperty> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
@@ -16,14 +16,16 @@ export async function getExtractionProperty(
   );
 
   if (!result) {
-    return null;
+    throw new Error(
+      `Cannot find ExtractionProperty ${name} in Extraction ${extractionId}`
+    );
   }
 
-  return new ExtractionProperty(
-    result.id,
-    result.extraction_id,
-    result.name,
-    result.value,
-    result.created_at
-  );
+  return {
+    id: result.id,
+    extractionId: result.extraction_id,
+    name: result.name,
+    value: result.value,
+    createdAt: result.created_at,
+  };
 }

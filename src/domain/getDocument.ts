@@ -1,8 +1,8 @@
 import { getDb } from "../db/index.js";
-import { Document } from "./Document.js";
 import { getDocumentProperties } from "./getDocumentProperties.js";
+import { Document } from "./types.js";
 
-export async function getDocument(id: number): Promise<Document | null> {
+export async function getDocument(id: number): Promise<Document> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
@@ -14,17 +14,18 @@ export async function getDocument(id: number): Promise<Document | null> {
   );
 
   if (!result) {
-    return null;
+    throw new Error(`Cannot find Document with id ${id}`);
   }
 
-  const document = new Document(
-    result.id,
-    result.name,
-    result.description,
-    result.type,
-    result.file_content_id,
-    result.created_at
-  );
+  const document: Document = {
+    id: result.id,
+    name: result.name,
+    description: result.description,
+    type: result.type,
+    fileContentId: result.file_content_id,
+    createdAt: result.created_at,
+    properties: [],
+  };
 
   document.properties = await getDocumentProperties(id);
 

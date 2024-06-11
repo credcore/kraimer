@@ -1,10 +1,10 @@
 import { getDb } from "../db/index.js";
-import { DocumentProperty } from "./DocumentProperty.js";
+import { DocumentProperty } from "./types.js";
 
 export async function getDocumentProperty(
   documentId: number,
   name: string
-): Promise<DocumentProperty | null> {
+): Promise<DocumentProperty> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
@@ -16,14 +16,16 @@ export async function getDocumentProperty(
   );
 
   if (!result) {
-    return null;
+    throw new Error(
+      `Cannot find DocumentProperty with name ${name} in Document ${documentId}`
+    );
   }
 
-  return new DocumentProperty(
-    result.id,
-    result.document_id,
-    result.name,
-    result.value,
-    result.created_at
-  );
+  return {
+    id: result.id,
+    documentId: result.document_id,
+    name: result.name,
+    value: result.value,
+    createdAt: result.created_at,
+  };
 }

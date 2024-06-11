@@ -1,10 +1,10 @@
 import { getDb } from "../db/index.js";
-import { DocumentGroupProperty } from "./DocumentGroupProperty.js";
+import { DocumentGroupProperty } from "./types.js";
 
 export async function getDocumentGroupProperty(
   documentGroupId: number,
   name: string
-): Promise<DocumentGroupProperty | null> {
+): Promise<DocumentGroupProperty> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
@@ -16,14 +16,16 @@ export async function getDocumentGroupProperty(
   );
 
   if (!result) {
-    return null;
+    throw new Error(
+      `Cannot find DocumentGroupProperty ${name} in DocumentGroup ${documentGroupId}`
+    );
   }
 
-  return new DocumentGroupProperty(
-    result.id,
-    result.document_group_id,
-    result.name,
-    result.value,
-    result.created_at
-  );
+  return {
+    id: result.id,
+    documentGroupId: result.document_group_id,
+    name: result.name,
+    value: result.value,
+    createdAt: result.created_at,
+  };
 }
