@@ -36,6 +36,8 @@ import { removeExtractionProperty } from "./domain/removeExtractionProperty.js";
 import { OrderByEnum, TaskStatusEnum } from "./domain/types.js";
 import { log } from "./logger/log.js";
 import { applyStrategy } from "./strategy/applyStrategy.js";
+import { getDocumentsInExtraction } from "./domain/getDocumentsInExtraction.js";
+import { getExtractionProperties } from "./domain/getExtractionProperties.js";
 
 async function start() {
   const argv = yargs(hideBin(process.argv))
@@ -387,6 +389,30 @@ async function start() {
               args.extractionId,
               args.name
             );
+            if (args.printOutput) {
+              log(result);
+            }
+          }
+        )
+        .command(
+          "get_documents",
+          "Get documents in an extraction",
+          (yargs) =>
+            yargs.option("extractionId", { type: "number", demandOption: true }),
+          async (args) => {
+            const result = await getDocumentsInExtraction(args.extractionId);
+            if (args.printOutput) {
+              log(result);
+            }
+          }
+        )
+        .command(
+          "get_properties",
+          "Get properties of an extraction",
+          (yargs) =>
+            yargs.option("extractionId", { type: "number", demandOption: true }),
+          async (args) => {
+            const result = await getExtractionProperties(args.extractionId);
             if (args.printOutput) {
               log(result);
             }
