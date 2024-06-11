@@ -1,7 +1,6 @@
 import { getDb } from "../db/index.js";
-import { OrderByEnum } from "./OrderByEnum.js";
 import { getDocumentProperties } from "./getDocumentProperties.js";
-import { Document } from "./types.js";
+import { Document, OrderByEnum } from "./types.js";
 
 export interface DocumentFilter {
   name?: string;
@@ -11,7 +10,7 @@ export async function getDocuments(
   startFrom: number,
   count: number,
   filter: DocumentFilter = {},
-  orderBy: OrderByEnum = OrderByEnum.ASC
+  orderBy: OrderByEnum = "ASC"
 ): Promise<Document[]> {
   const db = getDb();
   let query = `

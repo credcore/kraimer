@@ -1,7 +1,6 @@
 import { getDb } from "../db/index.js";
-import { OrderByEnum } from "./OrderByEnum.js";
 import { getDocument } from "./getDocument.js";
-import { DocumentGroup } from "./types.js";
+import { DocumentGroup, OrderByEnum } from "./types.js";
 
 export interface DocumentGroupFilter {
   name?: string;
@@ -11,7 +10,7 @@ export async function getDocumentGroups(
   startFrom: number = 0,
   count: number = 10,
   filter: DocumentGroupFilter = {},
-  orderBy: OrderByEnum = OrderByEnum.ASC
+  orderBy: OrderByEnum = "ASC"
 ): Promise<DocumentGroup[]> {
   const db = getDb();
   let query = `

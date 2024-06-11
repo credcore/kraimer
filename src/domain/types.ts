@@ -1,7 +1,5 @@
 // types.ts
 
-import { TaskStatusEnum } from "./TaskStatusEnum.js";
-
 // Document.ts
 export type Document = {
   id: number;

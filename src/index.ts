@@ -1,9 +1,3 @@
-import { config } from "dotenv";
-import { checkEnv } from "./env.js";
-
-config();
-checkEnv();
-
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -39,492 +33,482 @@ import { getExtractedFields } from "./domain/getExtractedFields.js";
 import { getExtraction } from "./domain/getExtraction.js";
 import { getExtractionProperty } from "./domain/getExtractionProperty.js";
 import { getExtractions } from "./domain/getExtractions.js";
-import { OrderByEnum } from "./domain/OrderByEnum.js";
 import { removeDocumentGroupProperty } from "./domain/removeDocumentGroupProperty.js";
 import { removeDocumentProperty } from "./domain/removeDocumentProperty.js";
 import { removeExtractionProperty } from "./domain/removeExtractionProperty.js";
-import { TaskStatusEnum } from "./domain/TaskStatusEnum.js";
 import { log } from "./logger/log.js";
-import { globalSettings } from "./settings.js";
-import { APP_VERSION } from "./settings/version.js";
 import { applyStrategy } from "./strategy/applyStrategy.js";
+import path from "path";
+import { readFileSync } from "fs";
+import { OrderByEnum, TaskStatusEnum } from "./domain/types.js";
 
-function start() {
-  const argv = yargs(hideBin(process.argv))
-    .command("version", "Show version information")
-    .command("document", "Document commands", (yargs) => {
-      yargs
-        .command("create", "Create a new document", {
-          name: { type: "string", demandOption: true },
-          description: { type: "string" },
-          type: { type: "string", demandOption: true },
-          "file-path": { type: "string", demandOption: true },
-        })
-        .command("delete", "Delete a document", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("get", "Get a document", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("get-all", "Get all documents", {
-          "start-from": { type: "number", default: 0 },
-          count: { type: "number", default: 10 },
-          "filter-name": { type: "string" },
-          "order-by": { type: "string", default: OrderByEnum.ASC },
-        })
-        .command("add-property", "Add a property to a document", {
-          "document-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-          value: { type: "string", demandOption: true },
-        })
-        .command("remove-property", "Remove a property from a document", {
-          "document-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-        })
-        .command("get-property", "Get a property of a document", {
-          "document-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-        })
-        .command("get-properties", "Get all properties of a document", {
-          "document-id": { type: "string", demandOption: true },
-        })
-        .demandCommand(1, "You need to specify a document command");
-    })
-    .command("document-group", "Document group commands", (yargs) => {
-      yargs
-        .command("create", "Create a new document group", {
-          name: { type: "string", demandOption: true },
-          description: { type: "string" },
-        })
-        .command("delete", "Delete a document group", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("get", "Get a document group", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("get-all", "Get all document groups", {
-          "start-from": { type: "number", default: 0 },
-          count: { type: "number", default: 10 },
-          "filter-name": { type: "string" },
-          "order-by": { type: "string", default: OrderByEnum.ASC },
-        })
-        .command("add-property", "Add a property to a document group", {
-          "document-group-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-          value: { type: "string", demandOption: true },
-        })
-        .command("remove-property", "Remove a property from a document group", {
-          "document-group-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-        })
-        .command("get-property", "Get a property of a document group", {
-          "document-group-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-        })
-        .command("add-document", "Add a document to a document group", {
-          "document-group-id": { type: "string", demandOption: true },
-          "document-id": { type: "string", demandOption: true },
-        })
-        .demandCommand(1, "You need to specify a document group command");
-    })
-    .command("extraction", "Extraction commands", (yargs) => {
-      yargs
-        .command("create", "Create a new extraction", {
-          "document-group-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-          status: { type: "string", demandOption: true },
-        })
-        .command("delete", "Delete an extraction", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("get", "Get an extraction", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("add-property", "Add a property to an extraction", {
-          "extraction-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-          value: { type: "string", demandOption: true },
-        })
-        .command("remove-property", "Remove a property from an extraction", {
-          "extraction-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-        })
-        .command("get-property", "Get a property of an extraction", {
-          "extraction-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-        })
-        .command("get-all", "Get all extractions", {
-          "document-group-id": { type: "string", demandOption: true },
-        })
-        .demandCommand(1, "You need to specify an extraction command");
-    })
-    .command("extracted-field", "Extracted field commands", (yargs) => {
-      yargs
-        .command("create", "Create a new extracted field", {
-          "extraction-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-          value: { type: "string", demandOption: true },
-          strategy: { type: "string", demandOption: true },
-          status: { type: "string", demandOption: true },
-        })
-        .command("delete", "Delete an extracted field", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("get", "Get an extracted field", {
-          id: { type: "string", demandOption: true },
-        })
-        .command("get-by-name", "Get an extracted field by name", {
-          "extraction-id": { type: "string", demandOption: true },
-          name: { type: "string", demandOption: true },
-        })
-        .command("get-all", "Get all extracted fields", {
-          "extraction-id": { type: "string", demandOption: true },
-        })
-        .demandCommand(1, "You need to specify an extracted field command");
-    })
-    .command(
-      "extracted-field-error",
-      "Extracted field error commands",
-      (yargs) => {
-        yargs
-          .command("create", "Create a new extracted field error", {
-            "extracted-field-id": { type: "string", demandOption: true },
-            message: { type: "string", demandOption: true },
-            data: { type: "string", demandOption: true },
-          })
-          .command("delete", "Delete an extracted field error", {
-            id: { type: "number", demandOption: true },
-          })
-          .command("get", "Get an extracted field error", {
-            id: { type: "number", demandOption: true },
-          })
-          .command("get-all", "Get all extracted field errors", {
-            "extraction-id": { type: "string", demandOption: true },
-            "extracted-field-id": { type: "string" },
-          })
-          .demandCommand(
-            1,
-            "You need to specify an extracted field error command"
-          );
-      }
-    )
-    .command("extract", "Extract commands", (yargs) => {
-      yargs
-        .command("field", "Extract a field", {
-          "extraction-id": { type: "string", demandOption: true },
-          strategy: { type: "string", demandOption: true },
-          args: { type: "array" },
-        })
-        .demandCommand(1, "You need to specify an extract command");
-    })
-    .option("llm", { type: "string" })
-    .option("model", { type: "string" })
-    .option("max-cost-per-session", { type: "number" })
-    .option("rpc-timeout", { type: "number" })
-    .option("rpc-retries", { type: "number" })
-    .option("disable-rpc", { type: "boolean" })
-    .option("debug", { type: "boolean" })
-    .option("disable-llm-cache", { type: "boolean" })
-    .option("search-llm-cache", { type: "boolean" })
-    .option("update-llm-cache", { type: "boolean" })
-    .option("async-task-id", { type: "string" })
-    .option("print-output", { type: "boolean" })
-    .option("ignore-llm-cache-entry", { type: "array", string: true })
-    .option("args-pdf-start-page", { type: "number" })
-    .option("args-pdf-end-page", { type: "number" })
-    .option("args-pdf-x-tolerance", { type: "number" })
-    .option("args-pdf-y-tolerance", { type: "number" })
-    .option("args-pdf-y-density", { type: "number" })
-    .option("args-pdf-line-height", { type: "number" })
-    .option("args-pdf-char-width", { type: "number" })
-    .help()
-    .parseSync();
-
-  // LLM
-  globalSettings.set("model", argv.model ?? process.env.KRAIMER_LLM_MODEL);
-
-  globalSettings.set(
-    "llm",
-    argv.llm ?? process.env.KRAIMER_LLM ?? "azure_openai"
-  );
-
-  globalSettings.set(
-    "maxCostPerSession",
-    argv["max-cost-per-session"] ??
-      parseInt(process.env.KRAIMER_LLM_MAX_COST_PER_SESSION ?? "50", 10)
-  );
-
-  // rpc
-  globalSettings.set(
-    "rpcTimeout",
-    argv["rpc-timeout"] ??
-      parseInt(process.env.KRAIMER_RPC_TIMEOUT ?? "300", 10)
-  );
-
-  globalSettings.set(
-    "rpcRetries",
-    argv["rpc-retries"] ?? parseInt(process.env.KRAIMER_RPC_RETRIES ?? "3", 10)
-  );
-
-  // start_page and end_page
-  if (argv["args-pdf-start-page"]) {
-    globalSettings.set("argsPdfStartPage", argv["args-pdf-start-page"]);
-  }
-
-  if (argv["args-pdf-end-page"]) {
-    globalSettings.set("argsPdfEndPage", argv["args-pdf-end-page"]);
-  }
-
-  // tolerance
-  if (argv["args-pdf-x-tolerance"]) {
-    globalSettings.set("argsPdfXTolerance", argv["args-pdf-x-tolerance"]);
-  }
-
-  if (argv["args-pdf-y-tolerance"]) {
-    globalSettings.set("argsPdfYTolerance", argv["args-pdf-y-tolerance"]);
-  }
-
-  // y density
-  if (argv["args-pdf-y-density"]) {
-    globalSettings.set("argsPdfYDensity", argv["args-pdf-y-density"]);
-  }
-
-  // line height
-  if (argv["args-pdf-line-height"]) {
-    globalSettings.set("argsPdfLineHeight", argv["args-pdf-line-height"]);
-  }
-
-  // char width
-  if (argv["args-pdf-char-width"]) {
-    globalSettings.set("argsPdfCharWidth", argv["args-pdf-char-width"]);
-  }
-
-  // debug
-  if (argv.debug) {
-    globalSettings.set("debug", true);
-  }
-
-  // task id
-  if (argv["async-task-id"]) {
-    globalSettings.set("asyncTaskId", argv["async-task-id"]);
-  }
-
-  // rpc enable/disable
-  if (argv["disable-rpc"]) {
-    globalSettings.set("disableRpc", true);
-  }
-
-  // llm caching
-  if (argv["disable-llm-cache"]) {
-    globalSettings.set("searchLlmCache", false);
-    globalSettings.set("updateLlmCache", false);
-  } else {
-    globalSettings.set("searchLlmCache", true);
-    globalSettings.set("updateLlmCache", true);
-  }
-  if (argv["search-llm-cache"]) {
-    globalSettings.set("searchLlmCache", true);
-  }
-  if (argv["update-llm-cache"]) {
-    globalSettings.set("updateLlmCache", true);
-  }
-
-  globalSettings.set(
-    "ignoreLlmCacheEntry",
-    argv["ignore-llm-cache-entry"] || []
-  );
-
-  if (argv._.includes("version")) {
-    log(APP_VERSION);
-  }
-
-  if (argv._.includes("document")) {
-    if (argv.document === "create") {
-      const result = createDocument(
-        argv.name,
-        argv.description,
-        argv.type,
-        argv["file-path"]
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv.document === "delete") {
-      deleteDocument(argv.id);
-    } else if (argv.document === "get") {
-      const result = getDocument(argv.id);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv.document === "get-all") {
-      const documentFilter: DocumentFilter = { name: argv["filter-name"] };
-      const result = getDocuments(
-        argv["start-from"],
-        argv.count,
-        documentFilter,
-        argv["order-by"] as OrderByEnum
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv.document === "add-property") {
-      addDocumentProperty(argv["document-id"], argv.name, argv.value);
-    } else if (argv.document === "remove-property") {
-      removeDocumentProperty(argv["document-id"], argv.name);
-    } else if (argv.document === "get-property") {
-      const result = getDocumentProperty(argv["document-id"], argv.name);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv.document === "get-properties") {
-      const result = getDocumentProperties(argv["document-id"]);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    }
-  } else if (argv._.includes("document-group")) {
-    if (argv["document-group"] === "create") {
-      const result = createDocumentGroup(argv.name, argv.description);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["document-group"] === "delete") {
-      deleteDocumentGroup(argv.id);
-    } else if (argv["document-group"] === "get") {
-      const result = getDocumentGroup(argv.id);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["document-group"] === "get-all") {
-      const documentGroupFilter: DocumentGroupFilter = {
-        name: argv["filter-name"],
-      };
-      const result = getDocumentGroups(
-        argv["start-from"],
-        argv.count,
-        documentGroupFilter,
-        argv["order-by"] as OrderByEnum
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["document-group"] === "add-property") {
-      addDocumentGroupProperty(
-        argv["document-group-id"],
-        argv.name,
-        argv.value
-      );
-    } else if (argv["document-group"] === "remove-property") {
-      removeDocumentGroupProperty(argv["document-group-id"], argv.name);
-    } else if (argv["document-group"] === "get-property") {
-      const result = getDocumentGroupProperty(
-        argv["document-group-id"],
-        argv.name
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["document-group"] === "add-document") {
-      addDocumentToGroup(argv["document-group-id"], argv["document-id"]);
-    }
-  } else if (argv._.includes("extraction")) {
-    if (argv.extraction === "create") {
-      const result = createExtraction(
-        argv["document-group-id"],
-        argv.name,
-        argv.status as TaskStatusEnum
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv.extraction === "delete") {
-      deleteExtraction(argv.id);
-    } else if (argv.extraction === "get") {
-      const result = getExtraction(argv.id);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv.extraction === "add-property") {
-      addExtractionProperty(argv["extraction-id"], argv.name, argv.value);
-    } else if (argv.extraction === "remove-property") {
-      removeExtractionProperty(argv["extraction-id"], argv.name);
-    } else if (argv.extraction === "get-property") {
-      const result = getExtractionProperty(argv["extraction-id"], argv.name);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv.extraction === "get-all") {
-      const result = getExtractions(argv["document-group-id"]);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    }
-  } else if (argv._.includes("extracted-field")) {
-    if (argv["extracted-field"] === "create") {
-      const result = createExtractedField(
-        argv["extraction-id"],
-        argv.name,
-        argv.value,
-        argv.strategy,
-        argv.status as TaskStatusEnum
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["extracted-field"] === "delete") {
-      deleteExtractedField(argv.id);
-    } else if (argv["extracted-field"] === "get") {
-      const result = getExtractedField(argv.id);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["extracted-field"] === "get-all") {
-      const result = getExtractedFields(argv["extraction-id"]);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["extracted-field"] === "get-by-name") {
-      const result = getExtractedFieldByName(argv["extraction-id"], argv.name);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    }
-  } else if (argv._.includes("extracted-field-error")) {
-    if (argv["extracted-field-error"] === "create") {
-      const result = createExtractedFieldError(
-        argv["extracted-field-id"],
-        argv.message,
-        argv.data
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["extracted-field-error"] === "delete") {
-      deleteExtractedFieldError(argv.id);
-    } else if (argv["extracted-field-error"] === "get") {
-      const result = getExtractedFieldError(argv.id);
-      if (argv["print-output"]) {
-        log(result);
-      }
-    } else if (argv["extracted-field-error"] === "get-all") {
-      const result = getExtractedFieldErrors(
-        argv["extraction-id"],
-        argv["extracted-field-id"]
-      );
-      if (argv["print-output"]) {
-        log(result);
-      }
-    }
-  } else if (argv._.includes("extract")) {
-    if (argv.extract === "field") {
-      const userArgs: Record<string, string> =
-        argv.args?.reduce((acc, arg) => {
-          const [key, value] = arg.split("=");
-          acc[key] = value;
-          return acc;
-        }, {} as Record<string, string>) ?? {};
-
-      applyStrategy(argv["extraction-id"], argv.strategy, userArgs);
-    }
-  }
+function getPackageVersion(): string {
+  const pkg = path.join(__dirname, "../package.json");
+  const packageJSON = JSON.parse(readFileSync(pkg, "utf8"));
+  return packageJSON.version;
 }
+
+const argv = yargs(hideBin(process.argv))
+  // Version command
+  .command("version", "Show application version", {}, () => {
+    log(getPackageVersion());
+  })
+  // Document commands
+  .command(
+    "document create",
+    "Create a document",
+    (yargs) =>
+      yargs
+        .option("name", { type: "string", demandOption: true })
+        .option("description", { type: "string" })
+        .option("type", { type: "string", demandOption: true })
+        .option("filePath", { type: "string", demandOption: true }),
+    (args) => {
+      const result = createDocument(
+        args.name,
+        args.description ?? "",
+        args.type,
+        args.filePath
+      );
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document delete",
+    "Delete a document",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      deleteDocument(args.id);
+    }
+  )
+  .command(
+    "document get",
+    "Get a document",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getDocument(args.id);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document get_all",
+    "Get all documents",
+    (yargs) =>
+      yargs
+        .option("startFrom", { type: "number", default: 0 })
+        .option("count", { type: "number", default: 10 })
+        .option("filterName", { type: "string" })
+        .option("orderBy", {
+          type: "string",
+          default: "ASC",
+        }),
+    (args) => {
+      const result = getDocuments(
+        args.startFrom,
+        args.count,
+        { name: args.filterName },
+        args.orderBy as OrderByEnum
+      );
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document add_property",
+    "Add a property to a document",
+    (yargs) =>
+      yargs
+        .option("documentId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true })
+        .option("value", { type: "string", demandOption: true }),
+    (args) => {
+      addDocumentProperty(args.documentId, args.name, args.value);
+    }
+  )
+  .command(
+    "document remove_property",
+    "Remove a property from a document",
+    (yargs) =>
+      yargs
+        .option("documentId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true }),
+    (args) => {
+      removeDocumentProperty(args.documentId, args.name);
+    }
+  )
+  .command(
+    "document get_property",
+    "Get a property from a document",
+    (yargs) =>
+      yargs
+        .option("documentId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true }),
+    (args) => {
+      const result = getDocumentProperty(args.documentId, args.name);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document get_properties",
+    "Get properties from a document",
+    (yargs) =>
+      yargs.option("documentId", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getDocumentProperties(args.documentId);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  // Document Group commands
+  .command(
+    "document_group create",
+    "Create a document group",
+    (yargs) =>
+      yargs
+        .option("name", { type: "string", demandOption: true })
+        .option("description", { type: "string" }),
+    (args) => {
+      const result = createDocumentGroup(args.name, args.description ?? "");
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document_group delete",
+    "Delete a document group",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      deleteDocumentGroup(args.id);
+    }
+  )
+  .command(
+    "document_group get",
+    "Get a document group",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getDocumentGroup(args.id);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document_group get_all",
+    "Get all document groups",
+    (yargs) =>
+      yargs
+        .option("startFrom", { type: "number", default: 0 })
+        .option("count", { type: "number", default: 10 })
+        .option("filterName", { type: "string" })
+        .option("orderBy", {
+          type: "string",
+          default: "ASC",
+        }),
+    (args) => {
+      const result = getDocumentGroups(
+        args.startFrom,
+        args.count,
+        { name: args.filterName },
+        args.orderBy as OrderByEnum
+      );
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document_group add_property",
+    "Add a property to a document group",
+    (yargs) =>
+      yargs
+        .option("documentGroupId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true })
+        .option("value", { type: "string", demandOption: true }),
+    (args) => {
+      addDocumentGroupProperty(args.documentGroupId, args.name, args.value);
+    }
+  )
+  .command(
+    "document_group remove_property",
+    "Remove a property from a document group",
+    (yargs) =>
+      yargs
+        .option("documentGroupId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true }),
+    (args) => {
+      removeDocumentGroupProperty(args.documentGroupId, args.name);
+    }
+  )
+  .command(
+    "document_group get_property",
+    "Get a property from a document group",
+    (yargs) =>
+      yargs
+        .option("documentGroupId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true }),
+    (args) => {
+      const result = getDocumentGroupProperty(args.documentGroupId, args.name);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "document_group add_document",
+    "Add a document to a document group",
+    (yargs) =>
+      yargs
+        .option("documentGroupId", { type: "number", demandOption: true })
+        .option("documentId", { type: "number", demandOption: true }),
+    (args) => {
+      addDocumentToGroup(args.documentGroupId, args.documentId);
+    }
+  )
+  // Extraction commands
+  .command(
+    "extraction create",
+    "Create an extraction",
+    (yargs) =>
+      yargs
+        .option("documentGroupId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true })
+        .option("status", {
+          type: "string",
+          demandOption: true,
+        }),
+    (args) => {
+      const result = createExtraction(
+        args.documentGroupId,
+        args.name,
+        args.status as TaskStatusEnum
+      );
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extraction delete",
+    "Delete an extraction",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      deleteExtraction(args.id);
+    }
+  )
+  .command(
+    "extraction get",
+    "Get an extraction",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getExtraction(args.id);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extraction get_all",
+    "Get all extractions",
+    (yargs) =>
+      yargs.option("documentGroupId", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getExtractions(args.documentGroupId);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extraction add_property",
+    "Add a property to an extraction",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true })
+        .option("value", { type: "string", demandOption: true }),
+    (args) => {
+      addExtractionProperty(args.extractionId, args.name, args.value);
+    }
+  )
+  .command(
+    "extraction remove_property",
+    "Remove a property from an extraction",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true }),
+    (args) => {
+      removeExtractionProperty(args.extractionId, args.name);
+    }
+  )
+  .command(
+    "extraction get_property",
+    "Get a property from an extraction",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true }),
+    (args) => {
+      const result = getExtractionProperty(args.extractionId, args.name);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  // Extracted Field commands
+  .command(
+    "extracted_field create",
+    "Create an extracted field",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true })
+        .option("value", { type: "string", demandOption: true })
+        .option("strategy", { type: "string", demandOption: true })
+        .option("status", {
+          type: "string",
+          demandOption: true,
+        }),
+    (args) => {
+      const result = createExtractedField(
+        args.extractionId,
+        args.name,
+        args.value,
+        args.strategy,
+        args.status as TaskStatusEnum
+      );
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extracted_field delete",
+    "Delete an extracted field",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      deleteExtractedField(args.id);
+    }
+  )
+  .command(
+    "extracted_field get",
+    "Get an extracted field",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getExtractedField(args.id);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extracted_field get_all",
+    "Get all extracted fields",
+    (yargs) =>
+      yargs.option("extractionId", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getExtractedFields(args.extractionId);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extracted_field get_by_name",
+    "Get an extracted field by name",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("name", { type: "string", demandOption: true }),
+    (args) => {
+      const result = getExtractedFieldByName(args.extractionId, args.name);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  // Extracted Field Error commands
+  .command(
+    "extracted_field_error create",
+    "Create an extracted field error",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("extractedFieldId", { type: "number", demandOption: true })
+        .option("message", { type: "string", demandOption: true })
+        .option("data", { type: "string", demandOption: true }),
+    (args) => {
+      const result = createExtractedFieldError(
+        args.extractionId,
+        args.extractedFieldId,
+        args.message,
+        args.data
+      );
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extracted_field_error delete",
+    "Delete an extracted field error",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      deleteExtractedFieldError(args.id);
+    }
+  )
+  .command(
+    "extracted_field_error get",
+    "Get an extracted field error",
+    (yargs) => yargs.option("id", { type: "number", demandOption: true }),
+    (args) => {
+      const result = getExtractedFieldError(args.id);
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  .command(
+    "extracted_field_error get_all",
+    "Get all extracted field errors",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("extractedFieldId", { type: "number" }),
+    (args) => {
+      const result = getExtractedFieldErrors(
+        args.extractionId,
+        args.extractedFieldId
+      );
+      if (args.printOutput) {
+        log(result);
+      }
+    }
+  )
+  // Extract commands
+  .command(
+    "extract field",
+    "Extract a field",
+    (yargs) =>
+      yargs
+        .option("extractionId", { type: "number", demandOption: true })
+        .option("strategy", { type: "string", demandOption: true })
+        .option("args", { type: "array" }),
+    (args) => {
+      const userArgs = Object.fromEntries(
+        args.args.map((arg: string) => arg.split("="))
+      );
+      applyStrategy(args.extractionId, args.strategy, userArgs);
+    }
+  )
+  .demandCommand()
+  .help().argv;
