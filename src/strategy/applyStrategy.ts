@@ -5,16 +5,36 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
+export async function applyStrategy(
+  strategy: string,
+  extractionId: number,
+  args: any
+) {
+  let strategyPath = strategy;
+  
+  if (!path.isAbsolute(strategyPath)) {
+    strategyPath = path.join(process.cwd(), strategy);
+  }
+
+  try {
+    await fs.access(strategyPath);
+  } catch {
+    throw new Error(`Strategy file not found at path: ${strategyPath}`);
+  }
+
+  return executeStrategyFile(strategyPath, extractionId, args);
+}
+
 async function executeStrategyFile(
   strategyPath: string,
-  documentGroupId: number,
+  extractionId: number,
   args: any
 ) {
   const argsArray = Object.entries(args).flatMap(([key, value]) => [
     `--${key}`,
     `${value}`,
   ]);
-  const command = `${strategyPath} --document-group-id ${documentGroupId} ${argsArray.join(
+  const command = `${strategyPath} --extraction-id ${extractionId} ${argsArray.join(
     " "
   )}`;
   try {
@@ -28,23 +48,4 @@ async function executeStrategyFile(
       `Failed to execute strategy at ${strategyPath}: ${error.message}`
     );
   }
-}
-
-export async function applyStrategy(
-  documentGroupId: number,
-  strategy: string,
-  args: any
-) {
-  let strategyPath = strategy;
-  if (!path.isAbsolute(strategyPath)) {
-    strategyPath = path.join(process.cwd(), strategy);
-  }
-
-  try {
-    await fs.access(strategyPath);
-  } catch {
-    throw new Error(`Strategy file not found at path: ${strategyPath}`);
-  }
-
-  return executeStrategyFile(strategyPath, documentGroupId, args);
 }

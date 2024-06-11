@@ -630,8 +630,8 @@ async function start() {
           "Extract a field",
           (yargs) =>
             yargs
-              .option("extractionId", { type: "number", demandOption: true })
-              .option("strategy", { type: "string", demandOption: true }),
+              .option("strategy", { type: "string", demandOption: true })
+              .option("extractionId", { type: "number", demandOption: true }),
           async (args) => {
             // Predefined keys
             const predefinedKeys = ["_", "$0", "extractionId", "strategy"];
@@ -644,11 +644,7 @@ async function start() {
               return obj;
             }, {} as Record<string, unknown>);
 
-            await applyStrategy(
-              args.extractionId,
-              args.strategy,
-              userArgs
-            );
+            await applyStrategy(args.strategy, args.extractionId, userArgs);
             process.exit(0);
           }
         )
