@@ -634,7 +634,7 @@ async function start() {
               .option("session", { type: "string" })
               .option("strategy", { type: "string", demandOption: true }),
           async (args) => {
-            const session = args.session ?? randomString();
+            const sessionId = args.session ?? randomString();
             // Predefined keys
             const predefinedKeys = ["_", "$0", "extractionId", "strategy"];
 
@@ -648,7 +648,7 @@ async function start() {
 
             await applyStrategy(
               args.extractionId,
-              session,
+              sessionId,
               args.strategy,
               userArgs
             );

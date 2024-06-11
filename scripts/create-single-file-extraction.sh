@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ../.env
+
 # Check if the correct number of arguments are given
 if [ "$#" -ne 5 ]; then
     echo "Usage: $0 <file-path> <document-type> <document-name> <doc-group-name> <extraction-name>"

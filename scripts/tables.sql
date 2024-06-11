@@ -1,107 +1,121 @@
--- Table: file_content
-CREATE TABLE IF NOT EXISTS file_content (
-  id BIGSERIAL PRIMARY KEY,
-  file_path VARCHAR NOT NULL,
-  content BYTEA NOT NULL,
-  content_type VARCHAR NOT NULL
+BEGIN;
+-- Generated SQL statements
+-- CREATE TABLE statements
+CREATE TABLE "migrations" (
+    "id" integer NOT NULL DEFAULT nextval('migrations_id_seq'::regclass),
+    "batch" integer,
+    "migration_time" timestamp with time zone,
+    "name" character varying(255)
 );
 
--- Table: document
-CREATE TABLE IF NOT EXISTS document (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR UNIQUE,
-  description VARCHAR,
-  type VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  file_content_id BIGINT REFERENCES file_content(id)
+CREATE TABLE "migrations_lock" (
+    "index" integer NOT NULL DEFAULT nextval('migrations_lock_index_seq'::regclass),
+    "is_locked" integer
 );
 
--- Table: document_group
-CREATE TABLE IF NOT EXISTS document_group (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR UNIQUE,
-  description VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "file_content" (
+    "id" bigint NOT NULL DEFAULT nextval('file_content_id_seq'::regclass),
+    "content" bytea NOT NULL,
+    "file_path" character varying(255) NOT NULL,
+    "content_type" character varying(255) NOT NULL
 );
 
--- Table: document_group_document
-CREATE TABLE IF NOT EXISTS document_group_document (
-  id BIGSERIAL PRIMARY KEY,
-  document_group_id BIGINT REFERENCES document_group(id),
-  document_id BIGINT REFERENCES document(id)
+CREATE TABLE "document" (
+    "id" bigint NOT NULL DEFAULT nextval('document_id_seq'::regclass),
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "file_content_id" bigint,
+    "name" character varying(255),
+    "description" character varying(255),
+    "type" character varying(255)
 );
 
--- Table: document_property
-CREATE TABLE IF NOT EXISTS document_property (
-  id BIGSERIAL PRIMARY KEY,
-  document_id BIGINT REFERENCES document(id),
-  name VARCHAR,
-  value VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "document_group" (
+    "id" bigint NOT NULL DEFAULT nextval('document_group_id_seq'::regclass),
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "name" character varying(255),
+    "description" character varying(255)
 );
 
--- Table: document_group_property
-CREATE TABLE IF NOT EXISTS document_group_property (
-  id BIGSERIAL PRIMARY KEY,
-  document_group_id BIGINT REFERENCES document_group(id),
-  name VARCHAR,
-  value VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "document_group_document" (
+    "id" bigint NOT NULL DEFAULT nextval('document_group_document_id_seq'::regclass),
+    "document_group_id" bigint,
+    "document_id" bigint
 );
 
--- Table: extraction
-CREATE TABLE IF NOT EXISTS extraction (
-  id BIGSERIAL PRIMARY KEY,
-  document_group_id BIGINT REFERENCES document_group(id),
-  name VARCHAR UNIQUE,
-  status VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "document_property" (
+    "id" bigint NOT NULL DEFAULT nextval('document_property_id_seq'::regclass),
+    "document_id" bigint,
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "name" character varying(255),
+    "value" character varying(255)
 );
 
--- Table: extracted_field
-CREATE TABLE IF NOT EXISTS extracted_field (
-  id BIGSERIAL PRIMARY KEY,
-  extraction_id BIGINT REFERENCES extraction(id),
-  name VARCHAR,
-  value VARCHAR,
-  strategy VARCHAR,
-  status VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (extraction_id, name)
+CREATE TABLE "document_group_property" (
+    "id" bigint NOT NULL DEFAULT nextval('document_group_property_id_seq'::regclass),
+    "document_group_id" bigint,
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "name" character varying(255),
+    "value" character varying(255)
 );
 
--- Table: extraction_property
-CREATE TABLE IF NOT EXISTS extraction_property (
-  id BIGSERIAL PRIMARY KEY,
-  extraction_id BIGINT REFERENCES extraction(id),
-  name VARCHAR,
-  value VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "extraction" (
+    "id" bigint NOT NULL DEFAULT nextval('extraction_id_seq'::regclass),
+    "document_group_id" bigint,
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "name" character varying(255),
+    "status" character varying(255)
 );
 
--- Table: extracted_field_error
-CREATE TABLE IF NOT EXISTS extracted_field_error (
-  id BIGSERIAL PRIMARY KEY,
-  extracted_field_id BIGINT REFERENCES extracted_field(id),
-  message VARCHAR,
-  data VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "extracted_field" (
+    "extraction_id" bigint,
+    "id" bigint NOT NULL DEFAULT nextval('extracted_field_id_seq'::regclass),
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "status" character varying(255),
+    "value" character varying(255),
+    "name" character varying(255),
+    "strategy" character varying(255)
 );
 
--- Table: llm_response
-CREATE TABLE IF NOT EXISTS llm_response (
-  id BIGSERIAL PRIMARY KEY,
-  llm VARCHAR,
-  model VARCHAR,
-  prompt_hash VARCHAR,
-  prompt TEXT,
-  response_id VARCHAR,
-  response TEXT,
-  finish_reason VARCHAR,
-  prompt_tokens INT,
-  completion_tokens INT,
-  total_tokens INT,
-  error VARCHAR,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (prompt_hash, model, llm)
+CREATE TABLE "extraction_property" (
+    "id" bigint NOT NULL DEFAULT nextval('extraction_property_id_seq'::regclass),
+    "extraction_id" bigint,
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "name" character varying(255),
+    "value" character varying(255)
 );
+
+CREATE TABLE "extracted_field_error" (
+    "id" bigint NOT NULL DEFAULT nextval('extracted_field_error_id_seq'::regclass),
+    "extracted_field_id" bigint,
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "message" character varying(255),
+    "data" character varying(255)
+);
+
+CREATE TABLE "llm_response" (
+    "id" bigint NOT NULL DEFAULT nextval('llm_response_id_seq'::regclass),
+    "prompt_tokens" integer,
+    "completion_tokens" integer,
+    "total_tokens" integer,
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    "response_id" character varying(255),
+    "response" text,
+    "finish_reason" character varying(255),
+    "error" character varying(255),
+    "llm" character varying(255),
+    "model" character varying(255),
+    "prompt_hash" character varying(255),
+    "prompt" text
+);
+
+-- Foreign Key and Index statements
+ALTER TABLE "document" ADD CONSTRAINT "document_file_content_id_foreign" FOREIGN KEY ("file_content_id") REFERENCES "file_content"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "document_group_document" ADD CONSTRAINT "document_group_document_document_group_id_foreign" FOREIGN KEY ("document_group_id") REFERENCES "document_group"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "document_group_document" ADD CONSTRAINT "document_group_document_document_id_foreign" FOREIGN KEY ("document_id") REFERENCES "document"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "document_property" ADD CONSTRAINT "document_property_document_id_foreign" FOREIGN KEY ("document_id") REFERENCES "document"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "document_group_property" ADD CONSTRAINT "document_group_property_document_group_id_foreign" FOREIGN KEY ("document_group_id") REFERENCES "document_group"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "extraction" ADD CONSTRAINT "extraction_document_group_id_foreign" FOREIGN KEY ("document_group_id") REFERENCES "document_group"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "extracted_field" ADD CONSTRAINT "extracted_field_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "extraction_property" ADD CONSTRAINT "extraction_property_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "extracted_field_error" ADD CONSTRAINT "extracted_field_error_extracted_field_id_foreign" FOREIGN KEY ("extracted_field_id") REFERENCES "extracted_field"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+COMMIT;
