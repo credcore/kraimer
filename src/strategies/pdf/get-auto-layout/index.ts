@@ -1,13 +1,11 @@
+import { execFile } from "child_process";
+import path from "path";
+import { promisify } from "util";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { execFile } from "child_process";
-import { promisify } from "util";
+import { createExtractedField } from "../../../domain/createExtractedField.js";
 import { getDocumentsInExtraction } from "../../../domain/getDocumentsInExtraction.js";
 import { saveFileContent } from "../../../domain/saveFileContent.js";
-import path from "path";
-import { createExtractedField } from "../../../domain/createExtractedField.js";
-import { getExtractedField } from "../../../domain/getExtractedField.js";
-import { getExtractedFieldByName } from "../../../domain/getExtractedFieldByName.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
