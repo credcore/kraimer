@@ -6,6 +6,8 @@ import { getDocumentsInExtraction } from "../../../domain/getDocumentsInExtracti
 import { saveFileContent } from "../../../domain/saveFileContent.js";
 import path from "path";
 import { createExtractedField } from "../../../domain/createExtractedField.js";
+import { getExtractedField } from "../../../domain/getExtractedField.js";
+import { getExtractedFieldByName } from "../../../domain/getExtractedFieldByName.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -77,7 +79,7 @@ for (const doc of documents) {
 
     await createExtractedField(
       argv.extractionId,
-      "pdf/get_auto_layout",
+      "pdf/auto_layout",
       stdout,
       "pdf/get_auto_layout",
       "FINISHED"
