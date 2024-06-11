@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function (knex) {
+export function up(knex) {
   return knex.schema
     .createTable("file_content", function (table) {
       table.bigIncrements("id").primary();
@@ -105,13 +105,13 @@ exports.up = function (knex) {
       table.timestamp("created_at").defaultTo(knex.fn.now());
       table.unique(["prompt_hash", "model", "llm"]);
     });
-};
+}
 
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function (knex) {
+export function down(knex) {
   return knex.schema
     .dropTableIfExists("llm_response")
     .dropTableIfExists("extracted_field_error")
@@ -124,4 +124,4 @@ exports.down = function (knex) {
     .dropTableIfExists("document_group")
     .dropTableIfExists("document")
     .dropTableIfExists("file_content");
-};
+}
