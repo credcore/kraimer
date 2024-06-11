@@ -11,9 +11,9 @@ export async function addDocumentGroupProperty(
   await db.none(
     `
       INSERT INTO document_group_property (document_group_id, name, value)
-      VALUES ($1, $2, $3)
+      VALUES ($<documentGroupId>, $<name>, $<value>)
     `,
-    [documentGroupId, name, value]
+    { documentGroupId, name, value }
   );
   return getDocumentGroupProperty(documentGroupId, name);
 }

@@ -5,8 +5,8 @@ export async function removeExtractionProperty(extractionId: number, name: strin
   await db.none(
     `
       DELETE FROM extraction_property
-      WHERE extraction_id = $1 AND name = $2
+      WHERE extraction_id = $<extractionId> AND name = $<name>
     `,
-    [extractionId, name]
+    { extractionId, name }
   );
 }

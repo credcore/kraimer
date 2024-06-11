@@ -7,10 +7,10 @@ export async function getExtractedFields(extractionId: number): Promise<Extracte
     `
       SELECT id, extraction_id, name, value, strategy, status, created_at
       FROM extracted_field
-      WHERE extraction_id = $1
+      WHERE extraction_id = $<extractionId>
       ORDER BY id ASC
     `,
-    [extractionId]
+    { extractionId }
   );
 
   return results.map(

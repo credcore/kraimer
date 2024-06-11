@@ -8,9 +8,9 @@ export async function getExtraction(id: number): Promise<Extraction | null> {
     `
       SELECT id, document_group_id, name, status, created_at
       FROM extraction
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 
   if (!result) {

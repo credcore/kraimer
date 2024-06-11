@@ -11,9 +11,9 @@ export async function addDocumentProperty(
   await db.none(
     `
       INSERT INTO document_property (document_id, name, value)
-      VALUES ($1, $2, $3)
+      VALUES ($<documentId>, $<name>, $<value>)
     `,
-    [documentId, name, value]
+    { documentId, name, value }
   );
   return getDocumentProperty(documentId, name);
 }

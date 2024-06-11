@@ -7,9 +7,9 @@ export async function getExtractedFieldError(id: number): Promise<ExtractedField
     `
       SELECT id, extraction_id, extracted_field_id, message, data, created_at
       FROM extracted_field_error
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 
   if (!result) {

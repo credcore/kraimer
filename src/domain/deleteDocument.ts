@@ -5,15 +5,15 @@ export async function deleteDocument(id: number): Promise<void> {
   await db.none(
     `
       DELETE FROM document_property
-      WHERE document_id = $1
+      WHERE document_id = $<id>
     `,
-    [id]
+    { id }
   );
   await db.none(
     `
       DELETE FROM document
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 }

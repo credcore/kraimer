@@ -18,15 +18,16 @@ export async function getDocuments(
     SELECT id, name, description, type, file_content_id, created_at
     FROM document
   `;
-  const values = [];
+  const values: any = {};
 
   if (filter.name) {
-    query += ` WHERE name = $1`;
-    values.push(filter.name);
+    query += ` WHERE name = $<name>`;
+    values.name = filter.name;
   }
 
-  query += ` ORDER BY id ${orderBy} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-  values.push(count, startFrom);
+  query += ` ORDER BY id ${orderBy} LIMIT $<count> OFFSET $<startFrom>`;
+  values.count = count;
+  values.startFrom = startFrom;
 
   const results = await db.manyOrNone(query, values);
 

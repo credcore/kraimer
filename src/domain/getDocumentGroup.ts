@@ -9,9 +9,9 @@ export async function getDocumentGroup(id: number): Promise<DocumentGroup | null
     `
       SELECT id, name, description, created_at
       FROM document_group
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 
   if (!result) {
@@ -29,9 +29,9 @@ export async function getDocumentGroup(id: number): Promise<DocumentGroup | null
     `
       SELECT id, document_group_id, name, value, created_at
       FROM document_group_property
-      WHERE document_group_id = $1
+      WHERE document_group_id = $<id>
     `,
-    [id]
+    { id }
   );
 
   documentGroup.properties = propertyResults.map(
@@ -49,9 +49,9 @@ export async function getDocumentGroup(id: number): Promise<DocumentGroup | null
     `
       SELECT document_id
       FROM document_group_document
-      WHERE document_group_id = $1
+      WHERE document_group_id = $<id>
     `,
-    [id]
+    { id }
   );
 
   const documentPromises = documentResults.map((doc) => getDocument(doc.document_id));

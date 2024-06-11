@@ -10,10 +10,10 @@ export async function createDocumentGroup(
   const result = await db.one(
     `
       INSERT INTO document_group (name, description)
-      VALUES ($1, $2)
+      VALUES ($<name>, $<description>)
       RETURNING id
     `,
-    [name, description]
+    { name, description }
   );
   return getDocumentGroup(result.id);
 }

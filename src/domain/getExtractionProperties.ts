@@ -7,9 +7,9 @@ export async function getExtractionProperties(extractionId: number): Promise<Ext
     `
       SELECT id, extraction_id, name, value, created_at
       FROM extraction_property
-      WHERE extraction_id = $1
+      WHERE extraction_id = $<extractionId>
     `,
-    [extractionId]
+    { extractionId }
   );
 
   return results.map(

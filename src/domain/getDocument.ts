@@ -8,9 +8,9 @@ export async function getDocument(id: number): Promise<Document | null> {
     `
       SELECT id, name, description, type, file_content_id, created_at
       FROM document
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 
   if (!result) {

@@ -8,9 +8,9 @@ export async function getExtractions(documentGroupId: number): Promise<Extractio
     `
       SELECT id, document_group_id, name, status, created_at
       FROM extraction
-      WHERE document_group_id = $1
+      WHERE document_group_id = $<documentGroupId>
     `,
-    [documentGroupId]
+    { documentGroupId }
   );
 
   const extractions: Extraction[] = [];

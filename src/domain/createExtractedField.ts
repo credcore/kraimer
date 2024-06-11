@@ -14,12 +14,12 @@ export async function createExtractedField(
   const result = await db.one(
     `
       INSERT INTO extracted_field (extraction_id, name, value, strategy, status)
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($<extractionId>, $<name>, $<value>, $<strategy>, $<status>)
       ON CONFLICT (extraction_id, name)
-      DO UPDATE SET value = $3, strategy = $4, status = $5
+      DO UPDATE SET value = $<value>, strategy = $<strategy>, status = $<status>
       RETURNING id
     `,
-    [extractionId, name, value, strategy, status]
+    { extractionId, name, value, strategy, status }
   );
   return getExtractedField(result.id);
 }

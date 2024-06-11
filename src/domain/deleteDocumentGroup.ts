@@ -5,22 +5,22 @@ export async function deleteDocumentGroup(id: number): Promise<void> {
   await db.none(
     `
       DELETE FROM document_group_property
-      WHERE document_group_id = $1
+      WHERE document_group_id = $<id>
     `,
-    [id]
+    { id }
   );
   await db.none(
     `
       DELETE FROM document_group_document
-      WHERE document_group_id = $1
+      WHERE document_group_id = $<id>
     `,
-    [id]
+    { id }
   );
   await db.none(
     `
       DELETE FROM document_group
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 }

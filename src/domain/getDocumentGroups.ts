@@ -19,17 +19,16 @@ export async function getDocumentGroups(
     SELECT id, name, description, created_at
     FROM document_group
   `;
-  const values = [];
+  const values: any = {};
 
   if (filter.name) {
-    query += ` WHERE name = $1`;
-    values.push(filter.name);
+    query += ` WHERE name = $<name>`;
+    values.name = filter.name;
   }
 
-  query += ` ORDER BY created_at ${orderBy} LIMIT $${values.length + 1} OFFSET $${
-    values.length + 2
-  }`;
-  values.push(count, startFrom);
+  query += ` ORDER BY created_at ${orderBy} LIMIT $<count> OFFSET $<startFrom>`;
+  values.count = count;
+  values.startFrom = startFrom;
 
   const results = await db.manyOrNone(query, values);
 
@@ -46,9 +45,9 @@ export async function getDocumentGroups(
       `
         SELECT id, document_group_id, name, value, created_at
         FROM document_group_property
-        WHERE document_group_id = $1
+        WHERE document_group_id = $<id>
       `,
-      [result.id]
+      { id: result.id }
     );
 
     documentGroup.properties = propertyResults.map(
@@ -66,16 +65,8 @@ export async function getDocumentGroups(
       `
         SELECT document_id
         FROM document_group_document
-        WHERE document_group_id = $1
+        WHERE document_group_id = $<id>
       `,
-      [result.id]
+      { id: result.id }
     );
 
-    const documentPromises = documentResults.map((doc) => getDocument(doc.document_id));
-    documentGroup.documents = await Promise.all(documentPromises);
-
-    documentGroups.push(documentGroup);
-  }
-
-  return documentGroups;
-}

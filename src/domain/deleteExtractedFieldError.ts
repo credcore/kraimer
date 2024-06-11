@@ -5,8 +5,8 @@ export async function deleteExtractedFieldError(id: number): Promise<void> {
   await db.none(
     `
       DELETE FROM extracted_field_error
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 }

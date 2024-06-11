@@ -7,9 +7,9 @@ export async function getExtractedField(id: number): Promise<ExtractedField | nu
     `
       SELECT id, extraction_id, name, value, strategy, status, created_at
       FROM extracted_field
-      WHERE id = $1
+      WHERE id = $<id>
     `,
-    [id]
+    { id }
   );
 
   if (!result) {

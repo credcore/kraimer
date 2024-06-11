@@ -14,19 +14,19 @@ export async function createDocument(
   const fileContentResult = await db.one(
     `
       INSERT INTO file_content (file_path, content, content_type)
-      VALUES ($1, $2, $3)
+      VALUES ($<filePath>, $<content>, $<contentType>)
       RETURNING id
     `,
-    [filePath, content, "any"]
+    { filePath, content, contentType: "any" }
   );
 
   const documentResult = await db.one(
     `
       INSERT INTO document (name, description, type, file_content_id)
-      VALUES ($1, $2, $3, $4)
+      VALUES ($<name>, $<description>, $<type>, $<fileContentId>)
       RETURNING id
     `,
-    [name, description, type, fileContentResult.id]
+    { name, description, type, fileContentId: fileContentResult.id }
   );
 
   return getDocument(documentResult.id);

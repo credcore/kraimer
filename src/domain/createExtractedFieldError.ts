@@ -12,10 +12,10 @@ export async function createExtractedFieldError(
   const result = await db.one(
     `
       INSERT INTO extracted_field_error (extraction_id, extracted_field_id, message, data)
-      VALUES ($1, $2, $3, $4)
+      VALUES ($<extractionId>, $<extractedFieldId>, $<message>, $<data>)
       RETURNING id
     `,
-    [extractionId, extractedFieldId, message, data]
+    { extractionId, extractedFieldId, message, data }
   );
   return getExtractedFieldError(result.id);
 }

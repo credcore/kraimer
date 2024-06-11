@@ -11,9 +11,9 @@ export async function addExtractionProperty(
   await db.none(
     `
       INSERT INTO extraction_property (extraction_id, name, value)
-      VALUES ($1, $2, $3)
+      VALUES ($<extractionId>, $<name>, $<value>)
     `,
-    [extractionId, name, value]
+    { extractionId, name, value }
   );
   return getExtractionProperty(extractionId, name);
 }

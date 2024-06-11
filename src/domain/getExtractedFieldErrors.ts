@@ -9,13 +9,13 @@ export async function getExtractedFieldErrors(
   let query = `
     SELECT id, extraction_id, extracted_field_id, message, data, created_at
     FROM extracted_field_error
-    WHERE extraction_id = $1
+    WHERE extraction_id = $<extractionId>
   `;
-  const values = [extractionId];
+  const values: any = { extractionId };
 
   if (extractedFieldId) {
-    query += ` AND extracted_field_id = $2`;
-    values.push(extractedFieldId);
+    query += ` AND extracted_field_id = $<extractedFieldId>`;
+    values.extractedFieldId = extractedFieldId;
   }
 
   const results = await db.manyOrNone(query, values);

@@ -10,9 +10,9 @@ export async function getDocumentProperty(
     `
       SELECT id, document_id, name, value, created_at
       FROM document_property
-      WHERE document_id = $1 AND name = $2
+      WHERE document_id = $<documentId> AND name = $<name>
     `,
-    [documentId, name]
+    { documentId, name }
   );
 
   if (!result) {

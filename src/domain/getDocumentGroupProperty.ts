@@ -10,9 +10,9 @@ export async function getDocumentGroupProperty(
     `
       SELECT id, document_group_id, name, value, created_at
       FROM document_group_property
-      WHERE document_group_id = $1 AND name = $2
+      WHERE document_group_id = $<documentGroupId> AND name = $<name>
     `,
-    [documentGroupId, name]
+    { documentGroupId, name }
   );
 
   if (!result) {

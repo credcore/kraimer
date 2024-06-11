@@ -12,10 +12,10 @@ export async function createExtraction(
   const result = await db.one(
     `
       INSERT INTO extraction (document_group_id, name, status)
-      VALUES ($1, $2, $3)
+      VALUES ($<documentGroupId>, $<name>, $<status>)
       RETURNING id
     `,
-    [documentGroupId, name, status]
+    { documentGroupId, name, status }
   );
   return getExtraction(result.id);
 }

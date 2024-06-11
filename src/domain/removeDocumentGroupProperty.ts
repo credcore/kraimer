@@ -5,8 +5,8 @@ export async function removeDocumentGroupProperty(documentGroupId: number, name:
   await db.none(
     `
       DELETE FROM document_group_property
-      WHERE document_group_id = $1 AND name = $2
+      WHERE document_group_id = $<documentGroupId> AND name = $<name>
     `,
-    [documentGroupId, name]
+    { documentGroupId, name }
   );
 }

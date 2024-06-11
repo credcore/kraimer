@@ -9,9 +9,9 @@ export async function saveFileContent(documentId: number): Promise<string> {
     `
       SELECT file_content_id
       FROM document
-      WHERE id = $1
+      WHERE id = $<documentId>
     `,
-    [documentId]
+    { documentId }
   );
 
   if (!documentResult) {
@@ -22,9 +22,9 @@ export async function saveFileContent(documentId: number): Promise<string> {
     `
       SELECT content
       FROM file_content
-      WHERE id = $1
+      WHERE id = $<fileContentId>
     `,
-    [documentResult.file_content_id]
+    { fileContentId: documentResult.file_content_id }
   );
 
   if (!fileContentResult) {

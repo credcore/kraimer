@@ -7,9 +7,9 @@ export async function getDocumentProperties(documentId: number): Promise<Documen
     `
       SELECT id, document_id, name, value, created_at
       FROM document_property
-      WHERE document_id = $1
+      WHERE document_id = $<documentId>
     `,
-    [documentId]
+    { documentId }
   );
 
   return results.map(

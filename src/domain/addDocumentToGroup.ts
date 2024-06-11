@@ -8,8 +8,8 @@ export async function addDocumentToGroup(
   await db.none(
     `
       INSERT INTO document_group_document (document_group_id, document_id)
-      VALUES ($1, $2)
+      VALUES ($<documentGroupId>, $<documentId>)
     `,
-    [documentGroupId, documentId]
+    { documentGroupId, documentId }
   );
 }

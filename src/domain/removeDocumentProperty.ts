@@ -5,8 +5,8 @@ export async function removeDocumentProperty(documentId: number, name: string): 
   await db.none(
     `
       DELETE FROM document_property
-      WHERE document_id = $1 AND name = $2
+      WHERE document_id = $<documentId> AND name = $<name>
     `,
-    [documentId, name]
+    { documentId, name }
   );
 }

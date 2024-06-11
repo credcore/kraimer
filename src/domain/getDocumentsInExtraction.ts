@@ -10,9 +10,9 @@ export async function getDocumentsInExtraction(extractionId: number): Promise<Do
       FROM document d
       INNER JOIN document_group_document dgd ON d.id = dgd.document_id
       INNER JOIN extraction e ON dgd.document_group_id = e.document_group_id
-      WHERE e.id = $1
+      WHERE e.id = $<extractionId>
     `,
-    [extractionId]
+    { extractionId }
   );
 
   const documents: Document[] = [];
