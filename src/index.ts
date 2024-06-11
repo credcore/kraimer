@@ -39,6 +39,7 @@ import { applyStrategy } from "./strategy/applyStrategy.js";
 import { getDocumentsInExtraction } from "./domain/getDocumentsInExtraction.js";
 import { getExtractionProperties } from "./domain/getExtractionProperties.js";
 import * as db from "./db/index.js";
+import { randomString } from "./utils/random.js";
 
 async function start() {
   await db.init();
@@ -630,8 +631,10 @@ async function start() {
           (yargs) =>
             yargs
               .option("extractionId", { type: "number", demandOption: true })
+              .option("session", { type: "string" })
               .option("strategy", { type: "string", demandOption: true }),
           async (args) => {
+            const session = args.session ?? randomString();
             // Predefined keys
             const predefinedKeys = ["_", "$0", "extractionId", "strategy"];
 
@@ -643,7 +646,12 @@ async function start() {
               return obj;
             }, {} as Record<string, unknown>);
 
-            await applyStrategy(args.extractionId, args.strategy, userArgs);
+            await applyStrategy(
+              args.extractionId,
+              session,
+              args.strategy,
+              userArgs
+            );
             process.exit(0);
           }
         )
