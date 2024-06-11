@@ -1,5 +1,5 @@
 import { getDb } from "../db/index.js";
-import { ExtractedFieldError } from "./ExtractedFieldError.js";
+import { ExtractedFieldError } from "./types.js";
 
 export async function getExtractedFieldErrors(
   extractionId: number,
@@ -20,15 +20,12 @@ export async function getExtractedFieldErrors(
 
   const results = await db.manyOrNone(query, values);
 
-  return results.map(
-    (error) =>
-      new ExtractedFieldError(
-        error.id,
-        error.extraction_id,
-        error.extracted_field_id,
-        error.message,
-        error.data,
-        error.created_at
-      )
-  );
+  return results.map((error) => ({
+    id: error.id,
+    extractionId: error.extraction_id,
+    extractedFieldId: error.extracted_field_id,
+    message: error.message,
+    data: error.data,
+    createdAt: error.created_at,
+  }));
 }

@@ -1,11 +1,11 @@
 import { getDb } from "../db/index.js";
-import { ExtractedField } from "./ExtractedField.js";
 import { TaskStatusEnum } from "./TaskStatusEnum.js";
+import { ExtractedField } from "./types.js";
 
 export async function getExtractedFieldByName(
   extractionId: number,
   name: string
-): Promise<ExtractedField | null> {
+): Promise<ExtractedField> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
@@ -17,16 +17,18 @@ export async function getExtractedFieldByName(
   );
 
   if (!result) {
-    return null;
+    throw new Error(
+      `Cannot find ExtractedField ${name} in Extraction ${extractionId}`
+    );
   }
 
-  return new ExtractedField(
-    result.id,
-    result.extraction_id,
-    result.name,
-    result.value,
-    result.strategy,
-    result.status as TaskStatusEnum,
-    result.created_at
-  );
+  return {
+    id: result.id,
+    extractionId: result.extraction_id,
+    name: result.name,
+    value: result.value,
+    strategy: result.strategy,
+    status: result.status as TaskStatusEnum,
+    createdAt: result.created_at,
+  };
 }

@@ -1,8 +1,10 @@
 import { getDb } from "../db/index.js";
-import { Document } from "./Document.js";
 import { getDocumentProperties } from "./getDocumentProperties.js";
+import { Document } from "./types.js";
 
-export async function getDocumentsInExtraction(extractionId: number): Promise<Document[]> {
+export async function getDocumentsInExtraction(
+  extractionId: number
+): Promise<Document[]> {
   const db = getDb();
   const results = await db.manyOrNone(
     `
@@ -17,16 +19,15 @@ export async function getDocumentsInExtraction(extractionId: number): Promise<Do
 
   const documents: Document[] = [];
   for (const result of results) {
-    const document = new Document(
-      result.id,
-      result.name,
-      result.description,
-      result.type,
-      result.file_content_id,
-      result.created_at
-    );
-
-    document.properties = await getDocumentProperties(document.id);
+    const document: Document = {
+      id: result.id,
+      name: result.name,
+      description: result.description,
+      type: result.type,
+      fileContentId: result.file_content_id,
+      createdAt: result.created_at,
+      properties: await getDocumentProperties(result.id),
+    };
 
     documents.push(document);
   }
