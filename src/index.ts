@@ -650,9 +650,6 @@ async function start() {
         )
         .demandCommand(1, "Please specify an extract subcommand");
     })
-    .parserConfiguration({
-      "camel-case-expansion": true,
-    })
     .demandCommand()
     .help().argv;
 }

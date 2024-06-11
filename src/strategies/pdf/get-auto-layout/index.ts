@@ -1,11 +1,10 @@
-import { execFile } from "child_process";
 import path from "path";
-import { promisify } from "util";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { createExtractedField } from "../../../domain/createExtractedField.js";
 import { getDocumentsInExtraction } from "../../../domain/getDocumentsInExtraction.js";
 import { saveFileContent } from "../../../domain/saveFileContent.js";
+import { execPythonScript } from "../../../process/execPythonScript.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -40,7 +39,6 @@ const argv = await yargs(hideBin(process.argv))
     describe: "Density for y-coordinate",
   }).argv;
 
-const execFileAsync = promisify(execFile);
 
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
@@ -52,39 +50,15 @@ for (const doc of documents) {
     "../../../../python/pdf/get_auto_layout.py"
   );
 
-  const args = [
-    pythonScriptPath,
-    fileName,
-    "--start_page",
-    argv.startPage,
-    "--end_page",
-    argv.endPage,
-    "--x_tolerance",
-    argv.xTolerance,
-    "--y_tolerance",
-    argv.yTolerance,
-    "--y_density",
-    argv.yDensity,
-  ].filter((arg) => arg !== undefined); // Remove undefined args
+  const output = await execPythonScript(pythonScriptPath, [fileName], argv);
 
-  try {
-    const { stdout, stderr } = await execFileAsync("python", args as string[]);
-
-    if (stderr) {
-      console.error(`Error: ${stderr}`);
-      continue;
-    }
-
-    await createExtractedField(
-      argv.extractionId,
-      "pdf/auto_layout",
-      stdout,
-      "pdf/get_auto_layout",
-      "FINISHED"
-    );
-  } catch (error) {
-    console.error(`Execution error: ${error}`);
-  }
+  await createExtractedField(
+    argv.extractionId,
+    "pdf/auto_layout",
+    output,
+    "pdf/get_auto_layout",
+    "FINISHED"
+  );
 }
 
 process.exit(0);

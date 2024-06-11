@@ -92,9 +92,9 @@ def get_auto_layout(
         # Append the extracted data to our data structure
         output["pages"].append(
             {
-                "page_number": page_number,
+                "pageNumber": page_number,
                 "text": page_text,
-                "text_layout": page_text_layout,
+                "textLayout": page_text_layout,
                 "tables": tables_with_bboxes,
             }
         )
@@ -104,36 +104,33 @@ def get_auto_layout(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Extract text and bounding box information from a PDF."
+        description="Extract text and bounding box information from a PDF.",
     )
-    parser.add_argument("pdf_path", type=str, help="Path to the PDF file")
+    parser.add_argument("pdfPath", type=str, help="Path to the PDF file")
+
     parser.add_argument(
-        "--start_page", type=int, default=1, help="Page to start extracting from"
+        "--startPage", type=int, default=1, help="Page to start extracting from"
     )
-    parser.add_argument("--end_page", type=int, help="Page to end extracting at")
+    parser.add_argument("--endPage", type=int, help="Page to end extracting at")
     parser.add_argument(
-        "--x_tolerance", type=int, default=3, help="Tolerance for x-coordinate"
-    )
-    parser.add_argument(
-        "--y_tolerance", type=int, default=3, help="Tolerance for y-coordinate"
+        "--xTolerance", type=int, default=3, help="Tolerance for x-coordinate"
     )
     parser.add_argument(
-        "--y_density", type=int, default=10, help="Density for y-coordinate"
+        "--yTolerance", type=int, default=3, help="Tolerance for y-coordinate"
+    )
+    parser.add_argument(
+        "--yDensity", type=int, default=10, help="Density for y-coordinate"
     )
 
-    args = parser.parse_args()
+    (options, args) = parser.parse_known_args()
 
     document_structure = get_auto_layout(
-        pdf_path=args.pdf_path,
-        start_page=args.start_page,
-        end_page=(
-            args.end_page
-            if args.end_page
-            else len(pdfplumber.open(args.pdf_path).pages)
-        ),
-        x_tolerance=args.x_tolerance,
-        y_tolerance=args.y_tolerance,
-        y_density=args.y_density,
+        pdf_path=options.pdfPath,
+        start_page=options.startPage,
+        end_page=(options.endPage if options.endPage else len(pdfplumber.open(options.pdfPath).pages)),
+        x_tolerance=options.xTolerance,
+        y_tolerance=options.yTolerance,
+        y_density=options.yDensity,
     )
 
     print(json.dumps(document_structure, indent=4))
