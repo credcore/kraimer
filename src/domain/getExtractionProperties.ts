@@ -1,7 +1,9 @@
 import { getDb } from "../db/index.js";
-import { ExtractionProperty } from "./ExtractionProperty.js";
+import { ExtractionProperty } from "./types.js";
 
-export async function getExtractionProperties(extractionId: number): Promise<ExtractionProperty[]> {
+export async function getExtractionProperties(
+  extractionId: number
+): Promise<ExtractionProperty[]> {
   const db = getDb();
   const results = await db.manyOrNone(
     `
@@ -12,14 +14,11 @@ export async function getExtractionProperties(extractionId: number): Promise<Ext
     { extractionId }
   );
 
-  return results.map(
-    (prop) =>
-      new ExtractionProperty(
-        prop.id,
-        prop.extraction_id,
-        prop.name,
-        prop.value,
-        prop.created_at
-      )
-  );
+  return results.map((prop) => ({
+    id: prop.id,
+    extractionId: prop.extraction_id,
+    name: prop.name,
+    value: prop.value,
+    createdAt: prop.created_at,
+  }));
 }

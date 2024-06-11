@@ -1,7 +1,9 @@
 import { getDb } from "../db/index.js";
-import { ExtractedField } from "./ExtractedField.js";
+import { ExtractedField } from "./types.js";
 
-export async function getExtractedFields(extractionId: number): Promise<ExtractedField[]> {
+export async function getExtractedFields(
+  extractionId: number
+): Promise<ExtractedField[]> {
   const db = getDb();
   const results = await db.manyOrNone(
     `
@@ -13,16 +15,13 @@ export async function getExtractedFields(extractionId: number): Promise<Extracte
     { extractionId }
   );
 
-  return results.map(
-    (field) =>
-      new ExtractedField(
-        field.id,
-        field.extraction_id,
-        field.name,
-        field.value,
-        field.strategy,
-        field.status,
-        field.created_at
-      )
-  );
+  return results.map((field) => ({
+    id: field.id,
+    extractionId: field.extraction_id,
+    name: field.name,
+    value: field.value,
+    strategy: field.strategy,
+    status: field.status,
+    createdAt: field.created_at,
+  }));
 }

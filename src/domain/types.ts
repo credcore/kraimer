@@ -79,3 +79,7 @@ export type ExtractionProperty = {
   value: string;
   createdAt: Date;
 };
+
+export type TaskStatusEnum = "NOT_STARTED" | "STARTED" | "FINISHED" | "ERROR";
+
+export type OrderByEnum = "ASC" | "DESC";
