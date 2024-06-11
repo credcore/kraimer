@@ -1,8 +1,8 @@
 import { getDb } from "../db/index.js";
-import { Extraction } from "./Extraction.js";
 import { getExtractionProperties } from "./getExtractionProperties.js";
+import { Extraction } from "./types.js";
 
-export async function getExtraction(id: number): Promise<Extraction | null> {
+export async function getExtraction(id: number): Promise<Extraction> {
   const db = getDb();
   const result = await db.oneOrNone(
     `
@@ -14,16 +14,17 @@ export async function getExtraction(id: number): Promise<Extraction | null> {
   );
 
   if (!result) {
-    return null;
+    throw new Error(`Cannot find Extraction with id ${id}`);
   }
 
-  const extraction = new Extraction(
-    result.id,
-    result.document_group_id,
-    result.name,
-    result.status,
-    result.created_at
-  );
+  const extraction: Extraction = {
+    id: result.id,
+    documentGroupId: result.document_group_id,
+    name: result.name,
+    status: result.status,
+    createdAt: result.created_at,
+    properties: [],
+  };
 
   extraction.properties = await getExtractionProperties(extraction.id);
 

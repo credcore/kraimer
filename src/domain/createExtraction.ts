@@ -1,7 +1,7 @@
 import { getDb } from "../db/index.js";
-import { Extraction } from "./Extraction.js";
-import { getExtraction } from "./getExtraction.js";
 import { TaskStatusEnum } from "./TaskStatusEnum.js";
+import { getExtraction } from "./getExtraction.js";
+import { Extraction } from "./types.js";
 
 export async function createExtraction(
   documentGroupId: number,

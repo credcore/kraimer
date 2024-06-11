@@ -1,7 +1,9 @@
 import { getDb } from "../db/index.js";
-import { DocumentProperty } from "./DocumentProperty.js";
+import { DocumentProperty } from "./types.js";
 
-export async function getDocumentProperties(documentId: number): Promise<DocumentProperty[]> {
+export async function getDocumentProperties(
+  documentId: number
+): Promise<DocumentProperty[]> {
   const db = getDb();
   const results = await db.manyOrNone(
     `
@@ -12,14 +14,11 @@ export async function getDocumentProperties(documentId: number): Promise<Documen
     { documentId }
   );
 
-  return results.map(
-    (prop) =>
-      new DocumentProperty(
-        prop.id,
-        prop.document_id,
-        prop.name,
-        prop.value,
-        prop.created_at
-      )
-  );
+  return results.map((prop) => ({
+    id: prop.id,
+    documentId: prop.document_id,
+    name: prop.name,
+    value: prop.value,
+    createdAt: prop.created_at,
+  }));
 }

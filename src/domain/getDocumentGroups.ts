@@ -1,8 +1,7 @@
 import { getDb } from "../db/index.js";
-import { DocumentGroup } from "./DocumentGroup.js";
-import { getDocument } from "./getDocument.js";
-import { getDocumentGroupProperty } from "./getDocumentGroupProperty.js";
 import { OrderByEnum } from "./OrderByEnum.js";
+import { getDocument } from "./getDocument.js";
+import { DocumentGroup } from "./types.js";
 
 export interface DocumentGroupFilter {
   name?: string;
@@ -34,12 +33,14 @@ export async function getDocumentGroups(
 
   const documentGroups: DocumentGroup[] = [];
   for (const result of results) {
-    const documentGroup = new DocumentGroup(
-      result.id,
-      result.name,
-      result.description,
-      result.created_at
-    );
+    const documentGroup: DocumentGroup = {
+      id: result.id,
+      name: result.name,
+      description: result.description,
+      createdAt: result.created_at,
+      properties: [],
+      documents: [],
+    };
 
     const propertyResults = await db.manyOrNone(
       `
@@ -50,16 +51,13 @@ export async function getDocumentGroups(
       { id: result.id }
     );
 
-    documentGroup.properties = propertyResults.map(
-      (prop) =>
-        new DocumentGroupProperty(
-          prop.id,
-          prop.document_group_id,
-          prop.name,
-          prop.value,
-          prop.created_at
-        )
-    );
+    documentGroup.properties = propertyResults.map((prop) => ({
+      id: prop.id,
+      documentGroupId: prop.document_group_id,
+      name: prop.name,
+      value: prop.value,
+      createdAt: prop.created_at,
+    }));
 
     const documentResults = await db.manyOrNone(
       `
