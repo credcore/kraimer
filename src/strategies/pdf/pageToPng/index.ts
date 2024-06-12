@@ -2,12 +2,11 @@ import path from "path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { createExtractedField } from "../../../domain/createExtractedField.js";
+import { createFileContent } from "../../../domain/createFileContent.js";
 import { getDocumentsInExtraction } from "../../../domain/getDocumentsInExtraction.js";
 import { saveFileContent } from "../../../domain/saveFileContent.js";
-import { execPythonScript } from "../../../process/execPythonScript.js";
 import { argsToArray } from "../../../process/argsToArray.js";
-import { getDocument } from "../../../domain/getDocument.js";
-import { createFileContent } from "../../../domain/createFileContent.js";
+import { execPythonScript } from "../../../process/execPythonScript.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
