@@ -3,7 +3,7 @@ import { LLM } from "./types.js";
 
 // Define mapping from names to modules
 const nameToModuleMapping: { [key: string]: LLM } = {
-  "azure-openai": azureOpenAI,
+  "azure_openai": azureOpenAI,
   // 'openai': ...
   // 'anthropic': anthropic
   // add more mappings as needed
