@@ -30,6 +30,7 @@ class DocumentStructure(TypedDict):
 
 def get_auto_layout(
     pdfPath: str,
+    extractionId: int,
     startPage: Optional[int] = None,
     endPage: Optional[int] = None,
     xTolerance: Optional[int] = None,
@@ -70,22 +71,36 @@ def get_auto_layout(
         endPage = max(1, min(endPage, len(pdf.pages)))
 
     # Adjust the pages to process based on the start and end pages
-    pages_to_process = pdf.pages[startPage - 1 : endPage]  # -1 because pages are 0-indexed
+    pages_to_process = pdf.pages[
+        startPage - 1 : endPage
+    ]  # -1 because pages are 0-indexed
 
     # Enumerate through each page
     for pageNumber, page in enumerate(pages_to_process, start=startPage):
         # Extract text from the page
-        pageText = page.extract_text(x_tolerance=xTolerance, y_tolerance=yTolerance, y_density=yDensity)
-        pageTextLayout = page.extract_text(layout=True, x_tolerance=xTolerance, y_tolerance=yTolerance, y_density=yDensity)
+        pageText = page.extract_text(
+            x_tolerance=xTolerance, y_tolerance=yTolerance, y_density=yDensity
+        )
+        pageTextLayout = page.extract_text(
+            layout=True,
+            x_tolerance=xTolerance,
+            y_tolerance=yTolerance,
+            y_density=yDensity,
+        )
 
         # Remove trailing whitespace from each line in pageTextLayout
         if pageTextLayout:
-            pageTextLayout = "\n".join(line.rstrip() for line in pageTextLayout.split("\n"))
+            pageTextLayout = "\n".join(
+                line.rstrip() for line in pageTextLayout.split("\n")
+            )
 
         # Extract tables from the page
         tables = page.extract_tables()
         # For bbox (bounding box), we'll assume you want the bbox of tables
-        tables_with_bboxes = [{"table": table, "bbox": page.find_tables()[i].bbox} for i, table in enumerate(tables)]
+        tables_with_bboxes = [
+            {"table": table, "bbox": page.find_tables()[i].bbox}
+            for i, table in enumerate(tables)
+        ]
 
         # Append the extracted data to our data structure
         output["pages"].append(
@@ -105,6 +120,7 @@ if __name__ == "__main__":
         description="Extract text and bounding box information from a PDF.",
     )
     parser.add_argument("pdfPath", type=str, help="Path to the PDF file")
+    parser.add_argument("--extractionId", type=int, help="The extraction id")
     parser.add_argument("--startPage", type=int, help="Page to start extracting from")
     parser.add_argument("--endPage", type=int, help="Page to end extracting at")
     parser.add_argument("--xTolerance", type=int, help="Tolerance for x-coordinate")

@@ -58,7 +58,7 @@ for (const doc of documents) {
     "../../../../python/pdf/get_auto_layout.py"
   );
 
-  const pythonArgs = argsToArray([fileName], argv, ["extractionId"]);
+  const pythonArgs = argsToArray([fileName], argv);
 
   const output = await execPythonScript(pythonScriptPath, pythonArgs);
 

@@ -32,8 +32,7 @@ const argv = await yargs(hideBin(process.argv))
   .option("debug", {
     type: "boolean",
     description: "Set debug mode",
-  })
-  .argv;
+  }).argv;
 
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
@@ -45,7 +44,7 @@ for (const doc of documents) {
     "../../../../python/pdf/page_to_png.py"
   );
 
-  const pythonArgs = argsToArray([fileName], argv, ["extractionId"]);
+  const pythonArgs = argsToArray([fileName], argv);
 
   const output = await execPythonScript(pythonScriptPath, pythonArgs);
   const pngFilePaths = JSON.parse(output).pages;

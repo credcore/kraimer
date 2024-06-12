@@ -1,13 +1,18 @@
-import json
 import base64
+import json
 import os
-from typing import List, Dict
+from typing import Dict, List
 from xmlrpc.client import Boolean
+
 import pdfplumber
 
 
 def convert_pdf_to_pngs(
-    pdf_path: str, start_page: int = 1, end_page: int = None, debug: Boolean = False
+    pdfPath: str,
+    extractionId: int,
+    startPage: int = 1,
+    endPage: int = None,
+    debug: Boolean = False,
 ) -> Dict[str, List[str]]:
     """
     Convert pages of a PDF to PNG format and save them.
@@ -20,18 +25,18 @@ def convert_pdf_to_pngs(
     Returns:
     - Dict[str, List[str]]: List of file paths of the saved PNG files.
     """
-    pdf = pdfplumber.open(pdf_path)
+    pdf = pdfplumber.open(pdfPath)
 
-    if end_page is None:
-        end_page = len(pdf.pages)
+    if endPage is None:
+        endPage = len(pdf.pages)
 
-    start_page = max(1, min(start_page, len(pdf.pages)))
-    end_page = max(1, min(end_page, len(pdf.pages)))
+    startPage = max(1, min(startPage, len(pdf.pages)))
+    endPage = max(1, min(endPage, len(pdf.pages)))
 
-    pages_to_process = pdf.pages[start_page - 1 : end_page]
+    pages_to_process = pdf.pages[startPage - 1 : endPage]
     result = []
 
-    for page_number, page in enumerate(pages_to_process, start=start_page):
+    for page_number, page in enumerate(pages_to_process, start=startPage):
         im = page.to_image(resolution=300)
         page_png_path = f"/tmp/page_{page_number}.png"
         im.save(page_png_path, format="PNG")
@@ -45,13 +50,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Convert PDF pages to PNG.")
     parser.add_argument("pdfPath", type=str, help="Path to the PDF file")
+    parser.add_argument("--extractionId", type=int, help="The extraction id")
     parser.add_argument(
         "--startPage", type=int, default=1, help="Page to start converting from"
     )
     parser.add_argument("--endPage", type=int, help="Page to end converting at")
     parser.add_argument("--debug", action="store_true")
-    args = parser.parse_args()
+    options = parser.parse_args()
 
-    result = convert_pdf_to_pngs(args.pdfPath, args.startPage, args.endPage, args.debug)
+    result = convert_pdf_to_pngs(**vars(options))
 
     print(json.dumps(result, indent=4))
