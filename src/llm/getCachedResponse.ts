@@ -1,12 +1,12 @@
 import { getDb } from "../db/index.js";
 import { debugPrint } from "../logger/log.js";
-import { LLMCompletionResponse } from "./types.js";
+import { LLMResponse } from "./types.js";
 
 export const getCachedResponse = async (
   promptHash: string,
   model?: string,
   llm?: string
-): Promise<LLMCompletionResponse | null> => {
+): Promise<LLMResponse | null> => {
   const db = await getDb();
 
   let query = `
@@ -33,7 +33,7 @@ export const getCachedResponse = async (
 
   if (!row) return null;
 
-  const llmResponse: LLMCompletionResponse = {
+  const llmResponse: LLMResponse = {
     llm: row.llm,
     model: row.model,
     promptHash: row.prompt_hash,

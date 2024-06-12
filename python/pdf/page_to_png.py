@@ -8,8 +8,8 @@ import pdfplumber
 
 
 def convert_pdf_to_pngs(
-    pdfPath: str,
     extractionId: int,
+    pdfPath: str,
     startPage: int = 1,
     endPage: int = None,
     debug: Boolean = False,
@@ -49,11 +49,10 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Convert PDF pages to PNG.")
-    parser.add_argument("pdfPath", type=str, help="Path to the PDF file")
+
     parser.add_argument("--extractionId", type=int, help="The extraction id")
-    parser.add_argument(
-        "--startPage", type=int, default=1, help="Page to start converting from"
-    )
+    parser.add_argument("--pdfPath", type=str, help="Path to the PDF file")
+    parser.add_argument("--startPage", type=int, help="Page to start extracting from")
     parser.add_argument("--endPage", type=int, help="Page to end converting at")
     parser.add_argument("--debug", action="store_true")
     options = parser.parse_args()

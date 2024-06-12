@@ -1,4 +1,4 @@
-export type LLMCompletionResponse = {
+export type LLMResponse = {
   llm: string;
   model: string;
   promptHash: string;
@@ -23,7 +23,7 @@ export type LLM = {
     model: string,
     messages: { role: string; content: any }[],
     useCache: boolean
-  ): Promise<LLMCompletionResponse>;
+  ): Promise<Omit<LLMResponse, "promptHash">>;
 
   calculateCost(
     model: string,

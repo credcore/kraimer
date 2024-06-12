@@ -29,8 +29,8 @@ class DocumentStructure(TypedDict):
 
 
 def get_auto_layout(
-    pdfPath: str,
     extractionId: int,
+    pdfPath: str,
     startPage: Optional[int] = None,
     endPage: Optional[int] = None,
     xTolerance: Optional[int] = None,
@@ -119,8 +119,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Extract text and bounding box information from a PDF.",
     )
-    parser.add_argument("pdfPath", type=str, help="Path to the PDF file")
     parser.add_argument("--extractionId", type=int, help="The extraction id")
+    parser.add_argument("--pdfPath", type=str, help="Path to the PDF file")
     parser.add_argument("--startPage", type=int, help="Page to start extracting from")
     parser.add_argument("--endPage", type=int, help="Page to end extracting at")
     parser.add_argument("--xTolerance", type=int, help="Tolerance for x-coordinate")

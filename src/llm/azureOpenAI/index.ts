@@ -1,8 +1,5 @@
-import crypto from "crypto";
-import { cacheResponse } from "../cacheResponse.js";
-import { getCachedResponse } from "../getCachedResponse.js";
-import { LLMCompletionResponse } from "../types.js";
 import { debugPrint } from "../../logger/log.js";
+import { LLMResponse } from "../types.js";
 
 // Define an app-wide constant for total session tokens
 let totalSessionCost = 0.0;
@@ -14,27 +11,9 @@ export type CompletionOptions = {
 
 export const invokeCompletion = async (
   model: string,
-  messages: { role: string; content: any }[],
-  useCache: boolean
-): Promise<LLMCompletionResponse> => {
+  messages: { role: string; content: any }[]
+): Promise<Omit<LLMResponse, "promptHash">> => {
   totalSessionCost; // Access the app-wide totalSessionCost
-
-  // Calculate a hash of the prompt for caching
-  const promptHash = crypto
-    .createHash("sha256")
-    .update(JSON.stringify(messages))
-    .digest("hex");
-
-  // First, try to get the response from the cache
-  if (useCache) {
-    const llm = "azure_openai"; // Hardcoding the LLM value as it's always "azure_openai"
-    const cachedResponse = await getCachedResponse(promptHash, model, llm);
-    if (cachedResponse) {
-      debugPrint("Response loaded from cache.");
-      debugPrint(cachedResponse.response);
-      return cachedResponse;
-    }
-  }
 
   debugPrint(
     `model=${model} prompt_length_chars=${JSON.stringify(messages).length}`
@@ -108,10 +87,9 @@ export const invokeCompletion = async (
     debugPrint(responseJson);
 
     // Create and return an instance of the LLMCompletionResponse type
-    const result: LLMCompletionResponse = {
+    const llmResponse: Omit<LLMResponse, "promptHash"> = {
       llm: "azure_openai",
       model,
-      promptHash,
       prompt: JSON.stringify(messages),
       responseId: responseJson.id,
       response: responseJson.choices[0].message.content,
@@ -129,15 +107,11 @@ export const invokeCompletion = async (
       error: undefined,
     };
 
-    if (useCache) {
-      cacheResponse(result);
-    }
-
     debugPrint(
-      `OPENAI chat completion:prompt_tokens=${result.promptTokens}, completion_tokens=${result.completionTokens}, total_tokens=${result.totalTokens}`
+      `OPENAI chat completion:prompt_tokens=${llmResponse.promptTokens}, completion_tokens=${llmResponse.completionTokens}, total_tokens=${llmResponse.totalTokens}`
     );
 
-    return result;
+    return llmResponse;
   } catch (error: any) {
     throw new Error(`Request failed: ${error}`);
   }

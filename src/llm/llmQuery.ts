@@ -1,8 +1,11 @@
 import { debugPrint } from "../logger/log.js";
 import { extractJson } from "./extractJson.js";
 import { llmFactory } from "./llmFactory.js";
-import { LLMCompletionResponse } from "./types.js";
-import { cacheResponse } from "./cacheResponse.js";
+import { LLMResponse } from "./types.js";
+import { saveResponse } from "./saveResponse.js";
+import { getExtractionCost } from "./getExtractionCost.js";
+import crypto from "crypto";
+import { getCachedResponse } from "./getCachedResponse.js";
 
 export const constructMessage = (
   prompt: string,
@@ -22,15 +25,15 @@ export const constructMessage = (
 };
 
 export const llmQuery = async (
+  extractionId: number,
   llmName: string,
   model: string,
   query: string,
   images: string[],
   useCache: boolean,
   maxCostPerSession: number,
-  responseType: string = "json",
-  responseJsonSchema: string
-): Promise<{ response: LLMCompletionResponse; json?: any; text?: string }> => {
+  responseType: string = "json"
+): Promise<{ response: LLMResponse; json?: any; text?: string }> => {
   // Check if the total session tokens exceed the maximum allowed
   if (images && !Array.isArray(images)) {
     throw new TypeError("images must be a list or null");
@@ -44,14 +47,41 @@ export const llmQuery = async (
 
   const messages = constructMessage(query, images);
 
-  const llm = llmFactory(llmName);
+  // Calculate a hash of the prompt for caching
+  const promptHash = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(messages))
+    .digest("hex");
 
-  const currentCost = 0;
-  if (currentCost > maxCostPerSession) {
-    throw new Error("Maximum session cost exceeded.");
-  }
+  const currentCost = await getExtractionCost(extractionId);
 
-  const llmResponse = await llm.invokeCompletion(model, messages, useCache);
+  // First, try to get the response from the cache
+  const cachedResponse = await getCachedResponse(promptHash, model, llmName);
+
+  const llmResponse =
+    cachedResponse && useCache
+      ? await (async () => {
+          debugPrint("Response loaded from cache.");
+          debugPrint(cachedResponse.response);
+          return cachedResponse;
+        })()
+      : await (async () => {
+          const llm = llmFactory(llmName);
+
+          if (currentCost > maxCostPerSession) {
+            throw new Error("Maximum session cost exceeded.");
+          }
+
+          const responseFromLLM = await llm.invokeCompletion(
+            model,
+            messages,
+            useCache
+          );
+
+          const fullResponse = { ...responseFromLLM, promptHash };
+          await saveResponse(fullResponse);
+          return fullResponse;
+        })();
 
   // Increase the total session tokens by the tokens used in this completion
   const totalSessionCost = currentCost + llmResponse.cost;
@@ -63,9 +93,6 @@ export const llmQuery = async (
     responseType === "json"
       ? extractJson(llmResponse.response)
       : llmResponse.response;
-
-  // Cache the response in the database
-  await cacheResponse(llmResponse);
 
   return {
     response: llmResponse,

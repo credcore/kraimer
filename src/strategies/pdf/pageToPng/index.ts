@@ -44,7 +44,7 @@ for (const doc of documents) {
     "../../../../python/pdf/page_to_png.py"
   );
 
-  const pythonArgs = argsToArray([fileName], argv);
+  const pythonArgs = argsToArray([], { ...argv, pdfPath: fileName });
 
   const output = await execPythonScript(pythonScriptPath, pythonArgs);
   const pngFilePaths = JSON.parse(output).pages;
