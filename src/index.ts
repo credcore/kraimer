@@ -95,7 +95,7 @@ async function start() {
           }
         )
         .command(
-          "get-all",
+          "getAll",
           "Get all documents",
           (yargs) =>
             yargs
@@ -117,7 +117,7 @@ async function start() {
           }
         )
         .command(
-          "add-property",
+          "addProperty",
           "Add a property to a document",
           (yargs) =>
             yargs
@@ -129,7 +129,7 @@ async function start() {
           }
         )
         .command(
-          "remove-property",
+          "removeProperty",
           "Remove a property from a document",
           (yargs) =>
             yargs
@@ -141,7 +141,7 @@ async function start() {
           }
         )
         .command(
-          "get-property",
+          "getProperty",
           "Get a property from a document",
           (yargs) =>
             yargs
@@ -159,7 +159,7 @@ async function start() {
           }
         )
         .command(
-          "get-properties",
+          "getProperties",
           "Get properties from a document",
           (yargs) =>
             yargs.option("documentId", { type: "number", demandOption: true }),
@@ -174,7 +174,7 @@ async function start() {
         .demandCommand(1, "Please specify a document subcommand");
     })
     .command(
-      "document-group <subcommand>",
+      "documentGroup <subcommand>",
       "Manage document groups",
       (yargs) => {
         yargs
@@ -220,7 +220,7 @@ async function start() {
             }
           )
           .command(
-            "get-all",
+            "getAll",
             "Get all document groups",
             (yargs) =>
               yargs
@@ -242,7 +242,7 @@ async function start() {
             }
           )
           .command(
-            "add-property",
+            "addProperty",
             "Add a property to a document group",
             (yargs) =>
               yargs
@@ -262,7 +262,7 @@ async function start() {
             }
           )
           .command(
-            "remove-property",
+            "removeProperty",
             "Remove a property from a document group",
             (yargs) =>
               yargs
@@ -280,7 +280,7 @@ async function start() {
             }
           )
           .command(
-            "get-property",
+            "getProperty",
             "Get a property from a document group",
             (yargs) =>
               yargs
@@ -301,7 +301,7 @@ async function start() {
             }
           )
           .command(
-            "add-document",
+            "addDocument",
             "Add a document to a document group",
             (yargs) =>
               yargs
@@ -362,7 +362,7 @@ async function start() {
           }
         )
         .command(
-          "get-all",
+          "getAll",
           "Get all extractions",
           (yargs) =>
             yargs.option("documentGroupId", {
@@ -378,7 +378,7 @@ async function start() {
           }
         )
         .command(
-          "add-property",
+          "addProperty",
           "Add a property to an extraction",
           (yargs) =>
             yargs
@@ -395,7 +395,7 @@ async function start() {
           }
         )
         .command(
-          "remove-property",
+          "removeProperty",
           "Remove a property from an extraction",
           (yargs) =>
             yargs
@@ -407,7 +407,7 @@ async function start() {
           }
         )
         .command(
-          "get-property",
+          "getProperty",
           "Get a property from an extraction",
           (yargs) =>
             yargs
@@ -425,7 +425,7 @@ async function start() {
           }
         )
         .command(
-          "get-documents",
+          "getDocuments",
           "Get documents in an extraction",
           (yargs) =>
             yargs.option("extractionId", {
@@ -441,7 +441,7 @@ async function start() {
           }
         )
         .command(
-          "get-properties",
+          "getProperties",
           "Get properties of an extraction",
           (yargs) =>
             yargs.option("extractionId", {
@@ -459,7 +459,7 @@ async function start() {
         .demandCommand(1, "Please specify an extraction subcommand");
     })
     .command(
-      "extracted-field <subcommand>",
+      "extractedField <subcommand>",
       "Manage extracted fields",
       (yargs) => {
         yargs
@@ -511,7 +511,7 @@ async function start() {
             }
           )
           .command(
-            "get-all",
+            "getAll",
             "Get all extracted fields",
             (yargs) =>
               yargs.option("extractionId", {
@@ -527,7 +527,7 @@ async function start() {
             }
           )
           .command(
-            "get-by-name",
+            "getByName",
             "Get an extracted field by name",
             (yargs) =>
               yargs
@@ -548,7 +548,7 @@ async function start() {
       }
     )
     .command(
-      "extracted-field-error <subcommand>",
+      "extractedFieldError <subcommand>",
       "Manage extracted field errors",
       (yargs) => {
         yargs
@@ -600,7 +600,7 @@ async function start() {
             }
           )
           .command(
-            "get-all",
+            "getAll",
             "Get all extracted field errors",
             (yargs) =>
               yargs
