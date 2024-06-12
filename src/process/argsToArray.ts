@@ -1,9 +1,15 @@
-export function argsToArray(obj: Record<string, unknown>) {
-  return Object.keys(obj).reduce(
+export function argsToArray(
+  positionals: string[],
+  obj: Record<string, unknown>,
+  exclude: string[] = []
+) {
+  const otherArgs = Object.keys(obj).reduce(
     (acc, key) =>
-      key.includes("-") || key === "_" || key === "$0"
+      key.includes("-") || key === "_" || key === "$0" || exclude.includes(key)
         ? acc
         : acc.concat(`--${key}`).concat((obj[key] as any).toString()),
     [] as string[]
   );
+
+  return positionals.concat(otherArgs);
 }

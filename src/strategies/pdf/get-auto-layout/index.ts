@@ -5,6 +5,7 @@ import { createExtractedField } from "../../../domain/createExtractedField.js";
 import { getDocumentsInExtraction } from "../../../domain/getDocumentsInExtraction.js";
 import { saveFileContent } from "../../../domain/saveFileContent.js";
 import { execPythonScript } from "../../../process/execPythonScript.js";
+import { argsToArray } from "../../../process/argsToArray.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -39,7 +40,6 @@ const argv = await yargs(hideBin(process.argv))
     describe: "Density for y-coordinate",
   }).argv;
 
-
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
 for (const doc of documents) {
@@ -50,7 +50,9 @@ for (const doc of documents) {
     "../../../../python/pdf/get_auto_layout.py"
   );
 
-  const output = await execPythonScript(pythonScriptPath, [fileName], argv);
+  const pythonArgs = argsToArray([fileName], argv, ["extractionId"]);
+
+  const output = await execPythonScript(pythonScriptPath, pythonArgs);
 
   await createExtractedField(
     argv.extractionId,

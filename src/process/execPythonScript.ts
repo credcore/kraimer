@@ -1,4 +1,3 @@
-import { argsToArray } from "./argsToArray.js";
 import { execFile } from "child_process";
 import { promisify } from "util";
 
@@ -6,15 +5,16 @@ const execFileAsync = promisify(execFile);
 
 export async function execPythonScript(
   pythonScriptPath: string,
-  positionals: string[],
-  scriptOpts: Record<string, unknown>
+  args: string[]
 ): Promise<string> {
-  const args = [pythonScriptPath]
-    .concat(positionals)
-    .concat(argsToArray(scriptOpts));
-
   try {
-    const { stdout, stderr } = await execFileAsync("python", args as string[]);
+    const { stdout, stderr } = await execFileAsync(
+      "python",
+      [pythonScriptPath].concat(args),
+      {
+        maxBuffer: 256 * 1024 * 1024, // 256 MEGS!
+      }
+    );
 
     if (stderr) {
       throw new Error(`Error: ${stderr}`);
