@@ -16,24 +16,24 @@ CREATE TABLE "migrations_lock" (
 CREATE TABLE "file_content" (
     "id" bigint NOT NULL DEFAULT nextval('file_content_id_seq'::regclass),
     "content" bytea NOT NULL,
-    "file_path" character varying(255) NOT NULL,
-    "content_type" character varying(255) NOT NULL
+    "file_path" text NOT NULL,
+    "content_type" text NOT NULL
 );
 
 CREATE TABLE "document" (
     "id" bigint NOT NULL DEFAULT nextval('document_id_seq'::regclass),
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     "file_content_id" bigint,
-    "name" character varying(255),
-    "description" character varying(255),
-    "type" character varying(255)
+    "name" text,
+    "description" text,
+    "type" text
 );
 
 CREATE TABLE "document_group" (
     "id" bigint NOT NULL DEFAULT nextval('document_group_id_seq'::regclass),
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "name" character varying(255),
-    "description" character varying(255)
+    "name" text,
+    "description" text
 );
 
 CREATE TABLE "document_group_document" (
@@ -46,50 +46,50 @@ CREATE TABLE "document_property" (
     "id" bigint NOT NULL DEFAULT nextval('document_property_id_seq'::regclass),
     "document_id" bigint,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "name" character varying(255),
-    "value" character varying(255)
+    "name" text,
+    "value" text
 );
 
 CREATE TABLE "document_group_property" (
     "id" bigint NOT NULL DEFAULT nextval('document_group_property_id_seq'::regclass),
     "document_group_id" bigint,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "name" character varying(255),
-    "value" character varying(255)
+    "name" text,
+    "value" text
 );
 
 CREATE TABLE "extraction" (
     "id" bigint NOT NULL DEFAULT nextval('extraction_id_seq'::regclass),
     "document_group_id" bigint,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "name" character varying(255),
-    "status" character varying(255)
+    "name" text,
+    "status" text
 );
 
 CREATE TABLE "extracted_field" (
     "extraction_id" bigint,
     "id" bigint NOT NULL DEFAULT nextval('extracted_field_id_seq'::regclass),
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "status" character varying(255),
-    "value" character varying(255),
-    "name" character varying(255),
-    "strategy" character varying(255)
+    "status" text,
+    "value" text,
+    "name" text,
+    "strategy" text
 );
 
 CREATE TABLE "extraction_property" (
     "id" bigint NOT NULL DEFAULT nextval('extraction_property_id_seq'::regclass),
     "extraction_id" bigint,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "name" character varying(255),
-    "value" character varying(255)
+    "name" text,
+    "value" text
 );
 
 CREATE TABLE "extracted_field_error" (
     "id" bigint NOT NULL DEFAULT nextval('extracted_field_error_id_seq'::regclass),
     "extracted_field_id" bigint,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "message" character varying(255),
-    "data" character varying(255)
+    "message" text,
+    "data" text
 );
 
 CREATE TABLE "llm_response" (
@@ -98,14 +98,22 @@ CREATE TABLE "llm_response" (
     "completion_tokens" integer,
     "total_tokens" integer,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "response_id" character varying(255),
+    "response_id" text,
     "response" text,
-    "finish_reason" character varying(255),
-    "error" character varying(255),
-    "llm" character varying(255),
-    "model" character varying(255),
-    "prompt_hash" character varying(255),
+    "finish_reason" text,
+    "error" text,
+    "llm" text,
+    "model" text,
+    "prompt_hash" text,
     "prompt" text
+);
+
+CREATE TABLE "llm_cost" (
+    "id" bigint NOT NULL DEFAULT nextval('llm_cost_id_seq'::regclass),
+    "extraction_id" bigint,
+    "llm_response_id" bigint,
+    "cost" numeric NOT NULL,
+    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Foreign Key and Index statements
@@ -118,4 +126,6 @@ ALTER TABLE "extraction" ADD CONSTRAINT "extraction_document_group_id_foreign" F
 ALTER TABLE "extracted_field" ADD CONSTRAINT "extracted_field_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extraction_property" ADD CONSTRAINT "extraction_property_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extracted_field_error" ADD CONSTRAINT "extracted_field_error_extracted_field_id_foreign" FOREIGN KEY ("extracted_field_id") REFERENCES "extracted_field"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "llm_cost" ADD CONSTRAINT "llm_cost_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "llm_cost" ADD CONSTRAINT "llm_cost_llm_response_id_foreign" FOREIGN KEY ("llm_response_id") REFERENCES "llm_response"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 COMMIT;

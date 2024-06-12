@@ -1,8 +1,6 @@
-import * as json from 'json';
-
 export const extractJson = (text: string): any | null => {
   const pattern = /```(?:json\s*)?(.*?)\s*```/gs;
-  const matches = [...text.matchAll(pattern)].map(match => match[1].trim());
+  const matches = [...text.matchAll(pattern)].map((match) => match[1].trim());
 
   if (matches.length > 0) {
     try {

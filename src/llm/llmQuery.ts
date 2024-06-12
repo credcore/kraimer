@@ -1,38 +1,42 @@
-import { globalSettings } from '../settings';
-import { extractJson } from './extractJson';
-import { llmFactory } from './llmFactory';
-import { LLMCompletionResponse } from './llmTypes';
-import { debugPrint } from '../logger/debugPrint';
-import { applyTemplate } from '../templating/applyTemplate';
+import { debugPrint } from "../logger/log.js";
+import { extractJson } from "./extractJson.js";
+import { llmFactory } from "./llmFactory.js";
+import { LLMCompletionResponse } from "./types.js";
+import { cacheResponse } from "./cacheResponse.js";
 
 export const constructMessage = (
-  prompt: string, images?: string[]
+  prompt: string,
+  images?: string[]
 ): { role: string; content: any }[] => {
-  const messageContent: { type: string; text?: string; image_url?: { url: string } }[] = [{ type: 'text', text: prompt }];
+  const messageContent: {
+    type: string;
+    text?: string;
+    image_url?: { url: string };
+  }[] = [{ type: "text", text: prompt }];
   if (images) {
     for (const image of images) {
-      messageContent.push({ type: 'image_url', image_url: { url: image } });
+      messageContent.push({ type: "image_url", image_url: { url: image } });
     }
   }
-  return [{ role: 'user', content: messageContent }];
+  return [{ role: "user", content: messageContent }];
 };
 
 export const llmQuery = async (
+  llmName: string,
+  model: string,
   query: string,
-  responseType: string = 'json',
-  responseJsonSchema?: string,
-  llmTemplate: string = 'step_by_step',
-  llmName?: string,
-  model?: string,
-  images?: string[]
+  images: string[],
+  useCache: boolean,
+  maxCostPerSession: number,
+  responseType: string = "json",
+  responseJsonSchema: string
 ): Promise<{ response: LLMCompletionResponse; json?: any; text?: string }> => {
+  // Check if the total session tokens exceed the maximum allowed
   if (images && !Array.isArray(images)) {
-    throw new TypeError('images must be a list or null');
+    throw new TypeError("images must be a list or null");
   }
 
-  const inputToLlm = applyTemplate(`llm/${llmTemplate}`, { prompt: query, json_schema: responseJsonSchema });
-
-  debugPrint(inputToLlm, 'Input to LLM');
+  debugPrint(query, "Input to LLM");
 
   if (images) {
     debugPrint(`Number of images: ${images.length}`);
@@ -40,20 +44,33 @@ export const llmQuery = async (
 
   const messages = constructMessage(query, images);
 
-  if (!llmName) {
-    llmName = globalSettings.llm;
-  }
-
-  if (!model) {
-    model = globalSettings.model;
-  }
-
   const llm = llmFactory(llmName);
-  const llmResponse = await llm.invokeCompletion(messages, model);
-  const responseValue = responseType === 'json' ? extractJson(llmResponse.response) : llmResponse.response;
+
+  const currentCost = 0;
+  if (currentCost > maxCostPerSession) {
+    throw new Error("Maximum session cost exceeded.");
+  }
+
+  const llmResponse = await llm.invokeCompletion(model, messages, useCache);
+
+  // Increase the total session tokens by the tokens used in this completion
+  const totalSessionCost = currentCost + llmResponse.cost;
+
+  debugPrint(`${llmName} response_cost=${llmResponse.cost}`);
+  debugPrint(`${llmName} session_cost=${totalSessionCost}`);
+
+  const responseValue =
+    responseType === "json"
+      ? extractJson(llmResponse.response)
+      : llmResponse.response;
+
+  // Cache the response in the database
+  await cacheResponse(llmResponse);
 
   return {
     response: llmResponse,
-    ...(responseType === 'json' ? { json: responseValue } : { text: responseValue })
+    ...(responseType === "json"
+      ? { json: responseValue }
+      : { text: responseValue }),
   };
 };

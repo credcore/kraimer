@@ -9,6 +9,7 @@ export type LLMCompletionResponse = {
   promptTokens: number;
   completionTokens: number;
   totalTokens: number;
+  cost: number;
   error?: string;
 };
 
@@ -19,14 +20,16 @@ export type LLMError = Error & {
 
 export type LLM = {
   invokeCompletion(
-    messages: { role: string; content: any }[], model: string
+    model: string,
+    messages: { role: string; content: any }[],
+    useCache: boolean
   ): Promise<LLMCompletionResponse>;
 
   calculateCost(
+    model: string,
     promptTokens: number,
     completionTokens: number,
     totalTokens: number,
-    images?: { [key: string]: number | string }[],
-    model?: string
+    images?: { [key: string]: number | string }[]
   ): number;
 };

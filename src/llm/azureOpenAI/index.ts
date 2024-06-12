@@ -1,45 +1,21 @@
 import crypto from "crypto";
-import * as os from "os";
-import axios from "axios";
-import { AxiosRetry, exponentialDelay } from "axios-retry";
-import { countTokens } from "./countTokens";
-import { debugPrint } from "../logger/debugPrint";
-import { globalSettings } from "../settings";
-import { SettingsError } from "../strategy/SettingsError";
-import { cacheResponse } from "./cacheResponse";
-import { getCachedResponse } from "./getCachedResponse";
-import { LLMCompletionResponse, LLMError } from "./llmTypes";
+import { cacheResponse } from "../cacheResponse.js";
+import { getCachedResponse } from "../getCachedResponse.js";
+import { LLMCompletionResponse } from "../types.js";
+import { debugPrint } from "../../logger/log.js";
 
 // Define an app-wide constant for total session tokens
 let totalSessionCost = 0.0;
 
-type RetryCallback = () => void;
-
-const createLLMRetry = (
-  callback?: RetryCallback,
-  options?: any
-): AxiosRetry => {
-  const retryCondition = (error: any) => {
-    if (callback) callback();
-    debugPrint(`Retry triggered due to: ${error}`);
-    return true;
-  };
-
-  return new AxiosRetry({
-    retries: globalSettings.rpc_retries,
-    retryDelay: exponentialDelay,
-    retryCondition,
-    ...options,
-  });
-};
-
-const getMaxCostPerSession = (): number => {
-  return globalSettings.max_cost_per_session;
+export type CompletionOptions = {
+  maxCostPerSession: number;
+  currentCost: number;
 };
 
 export const invokeCompletion = async (
+  model: string,
   messages: { role: string; content: any }[],
-  model: string
+  useCache: boolean
 ): Promise<LLMCompletionResponse> => {
   totalSessionCost; // Access the app-wide totalSessionCost
 
@@ -50,23 +26,14 @@ export const invokeCompletion = async (
     .digest("hex");
 
   // First, try to get the response from the cache
-  if (globalSettings.search_llm_cache) {
+  if (useCache) {
     const llm = "azure_openai"; // Hardcoding the LLM value as it's always "azure_openai"
     const cachedResponse = await getCachedResponse(promptHash, model, llm);
-    if (
-      cachedResponse &&
-      !globalSettings.ignore_llm_cache_entry.includes(cachedResponse.responseId)
-    ) {
+    if (cachedResponse) {
       debugPrint("Response loaded from cache.");
       debugPrint(cachedResponse.response);
       return cachedResponse;
     }
-  }
-
-  if (globalSettings.disable_rpc) {
-    throw new SettingsError(
-      "RPC is disabled via the --disable_rpc flag. Refusing to call APIs."
-    );
   }
 
   debugPrint(
@@ -74,14 +41,15 @@ export const invokeCompletion = async (
   );
 
   // Read AZURE_OPENAI_API_KEY from the environment
-  const apiKey = os.env.AZURE_OPENAI_API_KEY;
+  const apiKey = process.env.AZURE_OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("AZURE_OPENAI_API_KEY environment variable is not set");
   }
 
   const modelEndpoints: { [key: string]: string | undefined } = {
-    "gpt-3.5-turbo": os.env.AZURE_OPENAI_GPT_35_TURBO_CHAT_COMPLETIONS_ENDPOINT,
-    "gpt-4o": os.env.AZURE_OPENAI_GPT_4O_CHAT_COMPLETIONS_ENDPOINT,
+    "gpt-3.5-turbo":
+      process.env.AZURE_OPENAI_GPT_35_TURBO_CHAT_COMPLETIONS_ENDPOINT,
+    "gpt-4o": process.env.AZURE_OPENAI_GPT_4O_CHAT_COMPLETIONS_ENDPOINT,
   };
 
   const completionsEndpoint = modelEndpoints[model];
@@ -102,18 +70,42 @@ export const invokeCompletion = async (
   const headers = { "Content-Type": "application/json", "api-key": apiKey };
 
   // Configure retry strategy
-  const retries = createLLMRetry(() => debugPrint("Timed out. Retrying."));
+  const retryFetch = async (
+    url: string,
+    options: RequestInit,
+    retries: number = 3,
+    delay: number = 1000
+  ): Promise<Response> => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url, options);
+        if (response.ok) {
+          return response;
+        }
+        if (i < retries - 1) {
+          debugPrint(`Retrying... (${i + 1}/${retries})`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      } catch (error) {
+        if (i === retries - 1) {
+          throw error;
+        }
+        debugPrint(`Retrying... (${i + 1}/${retries})`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error("Failed to fetch after multiple retries");
+  };
 
   try {
-    const response = await axios.post(completionsEndpoint, payload, {
+    const response = await retryFetch(completionsEndpoint, {
+      method: "POST",
       headers,
-      timeout: globalSettings.rpc_timeout,
-      retry: retries,
+      body: JSON.stringify(payload),
     });
-    debugPrint(response.data);
 
-    // Parse the response JSON
-    const responseJson = response.data;
+    const responseJson: any = await response.json();
+    debugPrint(responseJson);
 
     // Create and return an instance of the LLMCompletionResponse type
     const result: LLMCompletionResponse = {
@@ -127,10 +119,17 @@ export const invokeCompletion = async (
       promptTokens: responseJson.usage.prompt_tokens,
       completionTokens: responseJson.usage.completion_tokens,
       totalTokens: responseJson.usage.total_tokens,
+      cost: calculateCost(
+        model,
+        responseJson.prompt_tokens,
+        responseJson.completion_tokens,
+        responseJson.total_tokens,
+        []
+      ),
       error: undefined,
     };
 
-    if (globalSettings.update_llm_cache) {
+    if (useCache) {
       cacheResponse(result);
     }
 
@@ -138,39 +137,19 @@ export const invokeCompletion = async (
       `OPENAI chat completion:prompt_tokens=${result.promptTokens}, completion_tokens=${result.completionTokens}, total_tokens=${result.totalTokens}`
     );
 
-    // Increase the total session tokens by the tokens used in this completion
-    totalSessionCost += calculateCost(
-      result.promptTokens,
-      result.completionTokens,
-      result.totalTokens
-    );
-
-    debugPrint(`OPENAI session_cost=${totalSessionCost}`);
-
-    // Check if the total session tokens exceed the maximum allowed
-    const maxCostPerSession = getMaxCostPerSession();
-    if (totalSessionCost > maxCostPerSession) {
-      throw new LLMError("Maximum session cost exceeded.");
-    }
-
     return result;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
-      throw new LLMError(
-        `Request timed out after ${globalSettings.rpc_timeout} seconds.`
-      );
-    }
-    throw new LLMError(`Request failed: ${error.message}`);
+  } catch (error: any) {
+    throw new Error(`Request failed: ${error}`);
   }
 };
 
-const calculateCost = (
+export function calculateCost(
+  model: string,
   promptTokens: number,
   completionTokens: number,
   totalTokens: number,
-  images: { [key: string]: number | string }[] = [],
-  model: string = globalSettings.model
-): number => {
+  images: { [key: string]: number | string }[] = []
+): number {
   // Define the cost per 1000 tokens for each model
   const costPerMillionTokens: {
     [key: string]: { input: number; output: number };
@@ -198,4 +177,4 @@ const calculateCost = (
   const totalCost = totalTokenCost + imageCost;
 
   return totalCost;
-};
+}
