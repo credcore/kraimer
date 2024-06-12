@@ -98,22 +98,15 @@ CREATE TABLE "llm_response" (
     "completion_tokens" integer,
     "total_tokens" integer,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    "response_id" text,
+    "cost" numeric NOT NULL DEFAULT '0'::numeric,
     "response" text,
     "finish_reason" text,
     "error" text,
     "llm" text,
     "model" text,
     "prompt_hash" text,
-    "prompt" text
-);
-
-CREATE TABLE "llm_cost" (
-    "id" bigint NOT NULL DEFAULT nextval('llm_cost_id_seq'::regclass),
-    "extraction_id" bigint,
-    "llm_response_id" bigint,
-    "cost" numeric NOT NULL,
-    "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    "prompt" text,
+    "response_id" text
 );
 
 -- Foreign Key and Index statements
@@ -126,6 +119,4 @@ ALTER TABLE "extraction" ADD CONSTRAINT "extraction_document_group_id_foreign" F
 ALTER TABLE "extracted_field" ADD CONSTRAINT "extracted_field_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extraction_property" ADD CONSTRAINT "extraction_property_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extracted_field_error" ADD CONSTRAINT "extracted_field_error_extracted_field_id_foreign" FOREIGN KEY ("extracted_field_id") REFERENCES "extracted_field"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "llm_cost" ADD CONSTRAINT "llm_cost_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "llm_cost" ADD CONSTRAINT "llm_cost_llm_response_id_foreign" FOREIGN KEY ("llm_response_id") REFERENCES "llm_response"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 COMMIT;

@@ -8,9 +8,10 @@ import { saveFileContent } from "../../domain/saveFileContent.js";
 import { argsToArray } from "../../process/argsToArray.js";
 import { execPythonScript } from "../../process/execPythonScript.js";
 import { FileContent } from "../../domain/types.js";
+import { PagePngFieldEntry } from "./PagePngFieldEntry.js";
 
-export const FIELD_NAME = "pdf/pagePngs";
-export const STRATEGY = "pdf/pageToPng";
+const FIELD_NAME = "pdf/pagePngs";
+const STRATEGY = "pdf/pageToPng";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -40,13 +41,6 @@ const argv = await yargs(hideBin(process.argv))
 
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
-export type PagePngFieldEntry = {
-  id: number;
-  name: string;
-  content: {
-    files: FileContent[];
-  };
-};
 
 const pageToPngField = {
   documents: [] as PagePngFieldEntry[],

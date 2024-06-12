@@ -46,10 +46,6 @@ async function start() {
   await db.init();
 
   const argv = yargs(hideBin(process.argv))
-    .option("print", {
-      type: "boolean",
-      description: "Print the output",
-    })
     .option("debug", {
       type: "boolean",
       description: "Set debug mode",
@@ -76,9 +72,7 @@ async function start() {
               args.type,
               args.filePath
             );
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -96,9 +90,7 @@ async function start() {
           (yargs) => yargs.option("id", { type: "number", demandOption: true }),
           async (args) => {
             const result = await getDocument(args.id);
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -126,9 +118,7 @@ async function start() {
               { name: args.filterName },
               args.orderBy as OrderByEnum
             );
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -180,9 +170,7 @@ async function start() {
               args.documentId,
               args.name
             );
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -197,9 +185,7 @@ async function start() {
             }),
           async (args) => {
             const result = await getDocumentProperties(args.documentId);
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -222,9 +208,7 @@ async function start() {
                 args.name,
                 args.description ?? ""
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -245,9 +229,7 @@ async function start() {
               yargs.option("id", { type: "number", demandOption: true }),
             async (args) => {
               const result = await getDocumentGroup(args.id);
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -275,9 +257,7 @@ async function start() {
                 { name: args.filterName },
                 args.orderBy as OrderByEnum
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -337,9 +317,7 @@ async function start() {
                 args.documentGroupId,
                 args.name
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -391,9 +369,7 @@ async function start() {
                 args.filePath,
                 args.contentType
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -430,9 +406,7 @@ async function start() {
               args.name,
               args.status as TaskStatusEnum
             );
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -451,9 +425,7 @@ async function start() {
           (yargs) => yargs.option("id", { type: "number", demandOption: true }),
           async (args) => {
             const result = await getExtraction(args.id);
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -468,9 +440,7 @@ async function start() {
             }),
           async (args) => {
             const result = await getExtractions(args.documentGroupId);
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -527,9 +497,7 @@ async function start() {
               args.extractionId,
               args.name
             );
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -544,9 +512,7 @@ async function start() {
             }),
           async (args) => {
             const result = await getDocumentsInExtraction(args.extractionId);
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -561,9 +527,7 @@ async function start() {
             }),
           async (args) => {
             const result = await getExtractionProperties(args.extractionId);
-            if (args.print) {
-              log(result);
-            }
+            log(result);
             process.exit(0);
           }
         )
@@ -596,9 +560,7 @@ async function start() {
                 args.strategy,
                 args.status as TaskStatusEnum
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -619,9 +581,7 @@ async function start() {
               yargs.option("id", { type: "number", demandOption: true }),
             async (args) => {
               const result = await getExtractedField(args.id);
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -636,9 +596,7 @@ async function start() {
               }),
             async (args) => {
               const result = await getExtractedFields(args.extractionId);
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -658,9 +616,7 @@ async function start() {
                 args.extractionId,
                 args.name
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -699,9 +655,7 @@ async function start() {
                 args.message,
                 args.data
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -721,9 +675,7 @@ async function start() {
               yargs.option("id", { type: "number", demandOption: true }),
             async (args) => {
               const result = await getExtractedFieldError(args.id);
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )
@@ -746,9 +698,7 @@ async function start() {
                 args.extractionId,
                 args.extractedFieldId
               );
-              if (args.print) {
-                log(result);
-              }
+              log(result);
               process.exit(0);
             }
           )

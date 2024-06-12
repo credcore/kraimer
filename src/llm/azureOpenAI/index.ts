@@ -12,7 +12,7 @@ export type CompletionOptions = {
 export const invokeCompletion = async (
   model: string,
   messages: { role: string; content: any }[]
-): Promise<Omit<LLMResponse, "promptHash">> => {
+): Promise<Omit<LLMResponse, "extractionId" | "promptHash">> => {
   totalSessionCost; // Access the app-wide totalSessionCost
 
   debugPrint(
@@ -87,7 +87,7 @@ export const invokeCompletion = async (
     debugPrint(responseJson);
 
     // Create and return an instance of the LLMCompletionResponse type
-    const llmResponse: Omit<LLMResponse, "promptHash"> = {
+    const llmResponse: Omit<LLMResponse, "extractionId" | "promptHash"> = {
       llm: "azure_openai",
       model,
       prompt: JSON.stringify(messages),

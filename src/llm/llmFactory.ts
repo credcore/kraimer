@@ -1,9 +1,9 @@
-import * as azureOpenAI from "./azureOpenAI/index.js"
+import * as azureOpenAI from "./azureOpenAI/index.js";
 import { LLM } from "./types.js";
 
 // Define mapping from names to modules
 const nameToModuleMapping: { [key: string]: LLM } = {
-  azure_openai: azureOpenAI,
+  "azure-openai": azureOpenAI,
   // 'openai': ...
   // 'anthropic': anthropic
   // add more mappings as needed

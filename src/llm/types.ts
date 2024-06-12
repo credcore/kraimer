@@ -11,6 +11,7 @@ export type LLMResponse = {
   totalTokens: number;
   cost: number;
   error?: string;
+  extractionId: number;
 };
 
 export type LLMError = Error & {
@@ -23,7 +24,7 @@ export type LLM = {
     model: string,
     messages: { role: string; content: any }[],
     useCache: boolean
-  ): Promise<Omit<LLMResponse, "promptHash">>;
+  ): Promise<Omit<LLMResponse, "extractionId" | "promptHash">>;
 
   calculateCost(
     model: string,
@@ -33,3 +34,15 @@ export type LLM = {
     images?: { [key: string]: number | string }[]
   ): number;
 };
+
+export type MessageContent =
+  | {
+      type: "text";
+      text: string;
+    }
+  | {
+      type: "image_url";
+      image_url: string;
+    };
+
+export type Message = { role: string; content: string | MessageContent[] };

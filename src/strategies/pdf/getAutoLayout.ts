@@ -6,9 +6,10 @@ import { getDocumentsInExtraction } from "../../domain/getDocumentsInExtraction.
 import { saveFileContent } from "../../domain/saveFileContent.js";
 import { argsToArray } from "../../process/argsToArray.js";
 import { execPythonScript } from "../../process/execPythonScript.js";
+import { AutoLayoutFieldEntry } from "./AutoLayoutFieldEntry.js";
 
-export const FIELD_NAME = "pdf/autoLayout";
-export const STRATEGY = "pdf/getAutoLayout";
+const FIELD_NAME = "pdf/autoLayout";
+const STRATEGY = "pdf/getAutoLayout";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -53,27 +54,6 @@ const argv = await yargs(hideBin(process.argv))
 
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
-type BoundingBox = [number, number, number, number];
-
-type PageData = {
-  pageNumber: number;
-  text: string | null;
-  textLayout: string | null;
-  tables: {
-    table: string[][];
-    bbox: BoundingBox;
-  }[];
-};
-
-type DocumentStructure = {
-  pages: PageData[];
-};
-
-export type AutoLayoutFieldEntry = {
-  id: number;
-  name: string;
-  content: DocumentStructure;
-};
 
 const autoLayoutField = {
   documents: [] as AutoLayoutFieldEntry[],

@@ -43,6 +43,7 @@ export const getCachedResponse = async (
     promptTokens: row.prompt_tokens,
     completionTokens: row.completion_tokens,
     totalTokens: row.total_tokens,
+    extractionId: row.extraction_id,
     cost: 0,
     error: row.error,
   };
