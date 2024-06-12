@@ -7,6 +7,10 @@ import { getDocumentsInExtraction } from "../../domain/getDocumentsInExtraction.
 import { saveFileContent } from "../../domain/saveFileContent.js";
 import { argsToArray } from "../../process/argsToArray.js";
 import { execPythonScript } from "../../process/execPythonScript.js";
+import { FileContent } from "../../domain/types.js";
+
+export const FIELD_NAME = "pdf/pagePngs";
+export const STRATEGY = "pdf/pageToPng";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -36,12 +40,24 @@ const argv = await yargs(hideBin(process.argv))
 
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
+export type PagePngFieldEntry = {
+  id: number;
+  name: string;
+  content: {
+    files: FileContent[];
+  };
+};
+
+const pageToPngField = {
+  documents: [] as PagePngFieldEntry[],
+};
+
 for (const doc of documents) {
   const fileName = await saveFileContent(doc.fileContentId);
 
   const pythonScriptPath = path.join(
     __dirname,
-    "../../../../python/pdf/page_to_png.py"
+    "../../../python/pdf/page_to_png.py"
   );
 
   const pythonArgs = argsToArray([], { ...argv, pdfPath: fileName });
@@ -49,19 +65,28 @@ for (const doc of documents) {
   const output = await execPythonScript(pythonScriptPath, pythonArgs);
   const pngFilePaths = JSON.parse(output).pages;
 
-  const fileContentIds = [];
+  const fileContentList: FileContent[] = [];
+
   for (const pngFilePath of pngFilePaths) {
     const fileContentId = await createFileContent(pngFilePath, "image/png");
-    fileContentIds.push(fileContentId);
+    fileContentList.push(fileContentId);
   }
 
-  await createExtractedField(
-    argv.extractionId,
-    "pdf/page-png",
-    JSON.stringify(fileContentIds),
-    "pdf/page-to-png",
-    "FINISHED"
-  );
+  pageToPngField.documents.push({
+    id: doc.id,
+    name: doc.name,
+    content: {
+      files: fileContentList,
+    },
+  });
 }
+
+await createExtractedField(
+  argv.extractionId,
+  FIELD_NAME,
+  JSON.stringify(pageToPngField),
+  STRATEGY,
+  "FINISHED"
+);
 
 process.exit(0);

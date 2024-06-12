@@ -7,6 +7,9 @@ import { saveFileContent } from "../../domain/saveFileContent.js";
 import { argsToArray } from "../../process/argsToArray.js";
 import { execPythonScript } from "../../process/execPythonScript.js";
 
+export const FIELD_NAME = "pdf/autoLayout";
+export const STRATEGY = "pdf/getAutoLayout";
+
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const argv = await yargs(hideBin(process.argv))
@@ -50,25 +53,59 @@ const argv = await yargs(hideBin(process.argv))
 
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
+type BoundingBox = [number, number, number, number];
+
+type PageData = {
+  pageNumber: number;
+  text: string | null;
+  textLayout: string | null;
+  tables: {
+    table: string[][];
+    bbox: BoundingBox;
+  }[];
+};
+
+type DocumentStructure = {
+  pages: PageData[];
+};
+
+export type AutoLayoutFieldEntry = {
+  id: number;
+  name: string;
+  content: DocumentStructure;
+};
+
+const autoLayoutField = {
+  documents: [] as AutoLayoutFieldEntry[],
+};
+
 for (const doc of documents) {
   const fileName = await saveFileContent(doc.fileContentId);
 
   const pythonScriptPath = path.join(
     __dirname,
-    "../../../../python/pdf/get_auto_layout.py"
+    "../../../python/pdf/get_auto_layout.py"
   );
 
   const pythonArgs = argsToArray([], { ...argv, pdfPath: fileName });
 
-  const output = await execPythonScript(pythonScriptPath, pythonArgs);
-
-  await createExtractedField(
-    argv.extractionId,
-    "pdf/auto-layout",
-    output,
-    "pdf/get-auto-layout",
-    "FINISHED"
+  const output = JSON.parse(
+    await execPythonScript(pythonScriptPath, pythonArgs)
   );
+
+  autoLayoutField.documents.push({
+    id: doc.id,
+    name: doc.name,
+    content: output,
+  });
 }
+
+await createExtractedField(
+  argv.extractionId,
+  FIELD_NAME,
+  JSON.stringify(autoLayoutField),
+  STRATEGY,
+  "FINISHED"
+);
 
 process.exit(0);
