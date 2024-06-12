@@ -1,5 +1,5 @@
 import { debugPrint } from "../../logger/log.js";
-import { LLMResponse } from "../types.js";
+import { LLMResponse, Message } from "../types.js";
 
 // Define an app-wide constant for total session tokens
 let totalSessionCost = 0.0;
@@ -11,7 +11,7 @@ export type CompletionOptions = {
 
 export const invokeCompletion = async (
   model: string,
-  messages: { role: string; content: any }[]
+  messages: Message[]
 ): Promise<Omit<LLMResponse, "extractionId" | "promptHash">> => {
   totalSessionCost; // Access the app-wide totalSessionCost
 
@@ -48,73 +48,49 @@ export const invokeCompletion = async (
 
   const headers = { "Content-Type": "application/json", "api-key": apiKey };
 
-  // Configure retry strategy
-  const retryFetch = async (
-    url: string,
-    options: RequestInit,
-    retries: number = 3,
-    delay: number = 1000
-  ): Promise<Response> => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch(url, options);
-        if (response.ok) {
-          return response;
-        }
-        if (i < retries - 1) {
-          debugPrint(`Retrying... (${i + 1}/${retries})`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      } catch (error) {
-        if (i === retries - 1) {
-          throw error;
-        }
-        debugPrint(`Retrying... (${i + 1}/${retries})`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-    throw new Error("Failed to fetch after multiple retries");
+  const response = await fetch(completionsEndpoint, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const responseText = await response.text();
+    throw new Error(
+      `Request failed with status: ${response.status}. ${responseText}`
+    );
+  }
+
+  const responseJson: any = await response.json();
+
+  debugPrint(responseJson);
+
+  // Create and return an instance of the LLMCompletionResponse type
+  const llmResponse: Omit<LLMResponse, "extractionId" | "promptHash"> = {
+    llm: "azure_openai",
+    model,
+    prompt: JSON.stringify(messages),
+    responseId: responseJson.id,
+    response: responseJson.choices[0].message.content,
+    finishReason: responseJson.choices[0].finish_reason,
+    promptTokens: responseJson.usage.prompt_tokens,
+    completionTokens: responseJson.usage.completion_tokens,
+    totalTokens: responseJson.usage.total_tokens,
+    cost: calculateCost(
+      model,
+      responseJson.usage.prompt_tokens,
+      responseJson.usage.completion_tokens,
+      responseJson.usage.total_tokens,
+      messages
+    ),
+    error: undefined,
   };
 
-  try {
-    const response = await retryFetch(completionsEndpoint, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-    });
+  debugPrint(
+    `OPENAI chat completion:prompt_tokens=${llmResponse.promptTokens}, completion_tokens=${llmResponse.completionTokens}, total_tokens=${llmResponse.totalTokens}`
+  );
 
-    const responseJson: any = await response.json();
-    debugPrint(responseJson);
-
-    // Create and return an instance of the LLMCompletionResponse type
-    const llmResponse: Omit<LLMResponse, "extractionId" | "promptHash"> = {
-      llm: "azure_openai",
-      model,
-      prompt: JSON.stringify(messages),
-      responseId: responseJson.id,
-      response: responseJson.choices[0].message.content,
-      finishReason: responseJson.choices[0].finish_reason,
-      promptTokens: responseJson.usage.prompt_tokens,
-      completionTokens: responseJson.usage.completion_tokens,
-      totalTokens: responseJson.usage.total_tokens,
-      cost: calculateCost(
-        model,
-        responseJson.usage.prompt_tokens,
-        responseJson.usage.completion_tokens,
-        responseJson.usage.total_tokens,
-        messages
-      ),
-      error: undefined,
-    };
-
-    debugPrint(
-      `OPENAI chat completion:prompt_tokens=${llmResponse.promptTokens}, completion_tokens=${llmResponse.completionTokens}, total_tokens=${llmResponse.totalTokens}`
-    );
-
-    return llmResponse;
-  } catch (error: any) {
-    throw new Error(`Request failed: ${error}`);
-  }
+  return llmResponse;
 };
 
 // In src/llm/azureOpenAI/index.ts
@@ -124,7 +100,7 @@ export function calculateCost(
   promptTokens: number,
   completionTokens: number,
   totalTokens: number,
-  messages: { role: string; content: any }[]
+  messages: Message[]
 ): number {
   // Define the cost per 1000 tokens for each model
   const costPerMillionTokens: {

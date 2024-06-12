@@ -77,7 +77,7 @@ for (const doc of documents) {
           },
           {
             type: "image_url",
-            image_url: base64Url,
+            image_url: { url: base64Url },
           },
         ],
       },
@@ -90,10 +90,6 @@ for (const doc of documents) {
       true,
       10
     );
-
-    console.log({
-      result,
-    });
   }
 }
 

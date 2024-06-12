@@ -5,7 +5,7 @@ export async function getExtractionCost(extractionId: number): Promise<number> {
 
   const result = await db.oneOrNone(
     `
-      SELECT COALESCE(SUM(cost), 0) as totalCost
+      SELECT COALESCE(SUM(cost), 0) as total_cost
       FROM llm_response
       WHERE extraction_id = $<extractionId>
     `,
@@ -18,5 +18,5 @@ export async function getExtractionCost(extractionId: number): Promise<number> {
     );
   }
 
-  return result.totalCost;
+  return parseFloat(result.total_cost);
 }

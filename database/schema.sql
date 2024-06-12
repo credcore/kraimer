@@ -99,14 +99,15 @@ CREATE TABLE "llm_response" (
     "total_tokens" integer,
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     "cost" numeric NOT NULL DEFAULT '0'::numeric,
-    "response" text,
+    "extraction_id" integer NOT NULL,
     "finish_reason" text,
     "error" text,
     "llm" text,
     "model" text,
     "prompt_hash" text,
     "prompt" text,
-    "response_id" text
+    "response_id" text,
+    "response" text
 );
 
 -- Foreign Key and Index statements
@@ -119,4 +120,6 @@ ALTER TABLE "extraction" ADD CONSTRAINT "extraction_document_group_id_foreign" F
 ALTER TABLE "extracted_field" ADD CONSTRAINT "extracted_field_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extraction_property" ADD CONSTRAINT "extraction_property_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extracted_field_error" ADD CONSTRAINT "extracted_field_error_extracted_field_id_foreign" FOREIGN KEY ("extracted_field_id") REFERENCES "extracted_field"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "llm_response" ADD CONSTRAINT "llm_response_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+CREATE INDEX ON "llm_response" USING CREATE INDEX llm_response_extraction_id_index ON public.llm_response USING btree (extraction_id);
 COMMIT;

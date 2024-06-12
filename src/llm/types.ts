@@ -22,8 +22,7 @@ export type LLMError = Error & {
 export type LLM = {
   invokeCompletion(
     model: string,
-    messages: { role: string; content: any }[],
-    useCache: boolean
+    messages: Message[]
   ): Promise<Omit<LLMResponse, "extractionId" | "promptHash">>;
 
   calculateCost(
@@ -31,7 +30,7 @@ export type LLM = {
     promptTokens: number,
     completionTokens: number,
     totalTokens: number,
-    images?: { [key: string]: number | string }[]
+    messages: Message[]
   ): number;
 };
 
@@ -42,7 +41,7 @@ export type MessageContent =
     }
   | {
       type: "image_url";
-      image_url: string;
+      image_url: { url: string };
     };
 
 export type Message = { role: string; content: string | MessageContent[] };

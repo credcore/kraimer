@@ -41,6 +41,7 @@ import { deleteFileContent } from "./domain/deleteFileContent.js";
 import { OrderByEnum, TaskStatusEnum } from "./domain/types.js";
 import { log } from "./logger/log.js";
 import { applyStrategy } from "./strategy/applyStrategy.js";
+import { getExtractionCost } from "./domain/getExtractionCost.js";
 
 async function start() {
   await db.init();
@@ -528,6 +529,21 @@ async function start() {
           async (args) => {
             const result = await getExtractionProperties(args.extractionId);
             log(result);
+            process.exit(0);
+          }
+        )
+        .command(
+          ["getCost", "get-cost"],
+          "List the total cost of an extraction",
+          (yargs) =>
+            yargs.option("extractionId", {
+              type: "number",
+              alias: "extraction-id",
+              demandOption: true,
+            }),
+          async (args) => {
+            const result = await getExtractionCost(args.extractionId);
+            log({ totalCost: result });
             process.exit(0);
           }
         )
