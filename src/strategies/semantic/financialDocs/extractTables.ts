@@ -6,6 +6,7 @@ import { PagePngFieldEntry } from "../../pdf/PagePngFieldEntry.js";
 import { readFileAsBase64 } from "../../../domain/readFileAsBase64.js";
 import { llmQuery } from "../../../llm/llmQuery.js";
 import { Message } from "../../../llm/types.js";
+import { setDebug } from "../../../config.js";
 
 const argv = await yargs(hideBin(process.argv))
   .option("extractionId", {
@@ -21,6 +22,10 @@ const argv = await yargs(hideBin(process.argv))
     type: "boolean",
     description: "Set debug mode",
   }).argv;
+
+if (argv.debug) {
+  setDebug(true);
+}
 
 const query = `
   Extract the financial tabular data, including the table title and legends, from the following image.

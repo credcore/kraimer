@@ -7,6 +7,7 @@ import { saveFileContent } from "../../domain/saveFileContent.js";
 import { argsToArray } from "../../process/argsToArray.js";
 import { execPythonScript } from "../../process/execPythonScript.js";
 import { AutoLayoutFieldEntry } from "./AutoLayoutFieldEntry.js";
+import { setDebug } from "../../config.js";
 
 const FIELD_NAME = "pdf/autoLayout";
 const STRATEGY = "pdf/getAutoLayout";
@@ -52,8 +53,11 @@ const argv = await yargs(hideBin(process.argv))
     description: "Set debug mode",
   }).argv;
 
-const documents = await getDocumentsInExtraction(argv.extractionId);
+if (argv.debug) {
+  setDebug(true);
+}
 
+const documents = await getDocumentsInExtraction(argv.extractionId);
 
 const autoLayoutField = {
   documents: [] as AutoLayoutFieldEntry[],

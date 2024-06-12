@@ -9,6 +9,7 @@ import { argsToArray } from "../../process/argsToArray.js";
 import { execPythonScript } from "../../process/execPythonScript.js";
 import { FileContent } from "../../domain/types.js";
 import { PagePngFieldEntry } from "./PagePngFieldEntry.js";
+import { setDebug } from "../../config.js";
 
 const FIELD_NAME = "pdf/pagePngs";
 const STRATEGY = "pdf/pageToPng";
@@ -39,8 +40,11 @@ const argv = await yargs(hideBin(process.argv))
     description: "Set debug mode",
   }).argv;
 
-const documents = await getDocumentsInExtraction(argv.extractionId);
+if (argv.debug) {
+  setDebug(true);
+}
 
+const documents = await getDocumentsInExtraction(argv.extractionId);
 
 const pageToPngField = {
   documents: [] as PagePngFieldEntry[],
