@@ -1,6 +1,7 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
+import * as db from "./db/index.js";
 import { addDocumentGroupProperty } from "./domain/addDocumentGroupProperty.js";
 import { addDocumentProperty } from "./domain/addDocumentProperty.js";
 import { addDocumentToGroup } from "./domain/addDocumentToGroup.js";
@@ -22,12 +23,14 @@ import { getDocumentGroups } from "./domain/getDocumentGroups.js";
 import { getDocumentProperties } from "./domain/getDocumentProperties.js";
 import { getDocumentProperty } from "./domain/getDocumentProperty.js";
 import { getDocuments } from "./domain/getDocuments.js";
+import { getDocumentsInExtraction } from "./domain/getDocumentsInExtraction.js";
 import { getExtractedField } from "./domain/getExtractedField.js";
 import { getExtractedFieldByName } from "./domain/getExtractedFieldByName.js";
 import { getExtractedFieldError } from "./domain/getExtractedFieldError.js";
 import { getExtractedFieldErrors } from "./domain/getExtractedFieldErrors.js";
 import { getExtractedFields } from "./domain/getExtractedFields.js";
 import { getExtraction } from "./domain/getExtraction.js";
+import { getExtractionProperties } from "./domain/getExtractionProperties.js";
 import { getExtractionProperty } from "./domain/getExtractionProperty.js";
 import { getExtractions } from "./domain/getExtractions.js";
 import { removeDocumentGroupProperty } from "./domain/removeDocumentGroupProperty.js";
@@ -36,10 +39,6 @@ import { removeExtractionProperty } from "./domain/removeExtractionProperty.js";
 import { OrderByEnum, TaskStatusEnum } from "./domain/types.js";
 import { log } from "./logger/log.js";
 import { applyStrategy } from "./strategy/applyStrategy.js";
-import { getDocumentsInExtraction } from "./domain/getDocumentsInExtraction.js";
-import { getExtractionProperties } from "./domain/getExtractionProperties.js";
-import * as db from "./db/index.js";
-import { randomString } from "./utils/random.js";
 
 async function start() {
   await db.init();
@@ -60,7 +59,11 @@ async function start() {
               .option("name", { type: "string", demandOption: true })
               .option("description", { type: "string" })
               .option("type", { type: "string", demandOption: true })
-              .option("filePath", { type: "string", demandOption: true }),
+              .option("filePath", {
+                type: "string",
+                demandOption: true,
+                alias: "file-path",
+              }),
           async (args) => {
             const result = await createDocument(
               args.name,
@@ -95,14 +98,22 @@ async function start() {
           }
         )
         .command(
-          "getAll",
+          ["getAll", "get-all"],
           "Get all documents",
           (yargs) =>
             yargs
-              .option("startFrom", { type: "number", default: 0 })
+              .option("startFrom", {
+                type: "number",
+                alias: "start-from",
+                default: 0,
+              })
               .option("count", { type: "number", default: 10 })
-              .option("filterName", { type: "string" })
-              .option("orderBy", { type: "string", default: "ASC" }),
+              .option("filterName", { type: "string", alias: "filter-name" })
+              .option("orderBy", {
+                type: "string",
+                alias: "order-by",
+                default: "ASC",
+              }),
           async (args) => {
             const result = await getDocuments(
               args.startFrom,
@@ -117,11 +128,15 @@ async function start() {
           }
         )
         .command(
-          "addProperty",
+          ["addProperty", "add-property"],
           "Add a property to a document",
           (yargs) =>
             yargs
-              .option("documentId", { type: "number", demandOption: true })
+              .option("documentId", {
+                type: "number",
+                alias: "document-id",
+                demandOption: true,
+              })
               .option("name", { type: "string", demandOption: true })
               .option("value", { type: "string", demandOption: true }),
           async (args) => {
@@ -129,11 +144,15 @@ async function start() {
           }
         )
         .command(
-          "removeProperty",
+          ["removeProperty", "remove-property"],
           "Remove a property from a document",
           (yargs) =>
             yargs
-              .option("documentId", { type: "number", demandOption: true })
+              .option("documentId", {
+                type: "number",
+                alias: "document-id",
+                demandOption: true,
+              })
               .option("name", { type: "string", demandOption: true }),
           async (args) => {
             await removeDocumentProperty(args.documentId, args.name);
@@ -141,11 +160,15 @@ async function start() {
           }
         )
         .command(
-          "getProperty",
+          ["getProperty", "get-property"],
           "Get a property from a document",
           (yargs) =>
             yargs
-              .option("documentId", { type: "number", demandOption: true })
+              .option("documentId", {
+                type: "number",
+                alias: "document-id",
+                demandOption: true,
+              })
               .option("name", { type: "string", demandOption: true }),
           async (args) => {
             const result = await getDocumentProperty(
@@ -159,10 +182,14 @@ async function start() {
           }
         )
         .command(
-          "getProperties",
+          ["getProperties", "get-properties"],
           "Get properties from a document",
           (yargs) =>
-            yargs.option("documentId", { type: "number", demandOption: true }),
+            yargs.option("documentId", {
+              type: "number",
+              alias: "document-id",
+              demandOption: true,
+            }),
           async (args) => {
             const result = await getDocumentProperties(args.documentId);
             if (args.print) {
@@ -174,7 +201,7 @@ async function start() {
         .demandCommand(1, "Please specify a document subcommand");
     })
     .command(
-      "documentGroup <subcommand>",
+      ["documentGroup <subcommand>", "document-group <subcommand>"],
       "Manage document groups",
       (yargs) => {
         yargs
@@ -220,14 +247,22 @@ async function start() {
             }
           )
           .command(
-            "getAll",
+            ["getAll", "get-all"],
             "Get all document groups",
             (yargs) =>
               yargs
-                .option("startFrom", { type: "number", default: 0 })
+                .option("startFrom", {
+                  type: "number",
+                  alias: "start-from",
+                  default: 0,
+                })
                 .option("count", { type: "number", default: 10 })
-                .option("filterName", { type: "string" })
-                .option("orderBy", { type: "string", default: "ASC" }),
+                .option("filterName", { type: "string", alias: "filter-name" })
+                .option("orderBy", {
+                  type: "string",
+                  alias: "order-by",
+                  default: "ASC",
+                }),
             async (args) => {
               const result = await getDocumentGroups(
                 args.startFrom,
@@ -242,12 +277,13 @@ async function start() {
             }
           )
           .command(
-            "addProperty",
+            ["addProperty", "add-property"],
             "Add a property to a document group",
             (yargs) =>
               yargs
                 .option("documentGroupId", {
                   type: "number",
+                  alias: "document-group-id",
                   demandOption: true,
                 })
                 .option("name", { type: "string", demandOption: true })
@@ -262,12 +298,13 @@ async function start() {
             }
           )
           .command(
-            "removeProperty",
+            ["removeProperty", "remove-property"],
             "Remove a property from a document group",
             (yargs) =>
               yargs
                 .option("documentGroupId", {
                   type: "number",
+                  alias: "document-group-id",
                   demandOption: true,
                 })
                 .option("name", { type: "string", demandOption: true }),
@@ -280,12 +317,13 @@ async function start() {
             }
           )
           .command(
-            "getProperty",
+            ["getProperty", "get-property"],
             "Get a property from a document group",
             (yargs) =>
               yargs
                 .option("documentGroupId", {
                   type: "number",
+                  alias: "document-group-id",
                   demandOption: true,
                 })
                 .option("name", { type: "string", demandOption: true }),
@@ -301,15 +339,20 @@ async function start() {
             }
           )
           .command(
-            "addDocument",
+            ["addDocument", "add-document"],
             "Add a document to a document group",
             (yargs) =>
               yargs
                 .option("documentGroupId", {
                   type: "number",
+                  alias: "document-group-id",
                   demandOption: true,
                 })
-                .option("documentId", { type: "number", demandOption: true }),
+                .option("documentId", {
+                  type: "number",
+                  alias: "document-id",
+                  demandOption: true,
+                }),
             async (args) => {
               await addDocumentToGroup(args.documentGroupId, args.documentId);
               process.exit(0);
@@ -325,7 +368,11 @@ async function start() {
           "Create an extraction",
           (yargs) =>
             yargs
-              .option("documentGroupId", { type: "number", demandOption: true })
+              .option("documentGroupId", {
+                type: "number",
+                alias: "document-group-id",
+                demandOption: true,
+              })
               .option("name", { type: "string", demandOption: true })
               .option("status", { type: "string", demandOption: true }),
           async (args) => {
@@ -362,11 +409,12 @@ async function start() {
           }
         )
         .command(
-          "getAll",
+          ["getAll", "get-all"],
           "Get all extractions",
           (yargs) =>
             yargs.option("documentGroupId", {
               type: "number",
+              alias: "document-group-id",
               demandOption: true,
             }),
           async (args) => {
@@ -378,11 +426,15 @@ async function start() {
           }
         )
         .command(
-          "addProperty",
+          ["addProperty", "add-property"],
           "Add a property to an extraction",
           (yargs) =>
             yargs
-              .option("extractionId", { type: "number", demandOption: true })
+              .option("extractionId", {
+                type: "number",
+                alias: "extraction-id",
+                demandOption: true,
+              })
               .option("name", { type: "string", demandOption: true })
               .option("value", { type: "string", demandOption: true }),
           async (args) => {
@@ -395,11 +447,15 @@ async function start() {
           }
         )
         .command(
-          "removeProperty",
+          ["removeProperty", "remove-property"],
           "Remove a property from an extraction",
           (yargs) =>
             yargs
-              .option("extractionId", { type: "number", demandOption: true })
+              .option("extractionId", {
+                type: "number",
+                alias: "extraction-id",
+                demandOption: true,
+              })
               .option("name", { type: "string", demandOption: true }),
           async (args) => {
             await removeExtractionProperty(args.extractionId, args.name);
@@ -407,11 +463,15 @@ async function start() {
           }
         )
         .command(
-          "getProperty",
+          ["getProperty", "get-property"],
           "Get a property from an extraction",
           (yargs) =>
             yargs
-              .option("extractionId", { type: "number", demandOption: true })
+              .option("extractionId", {
+                type: "number",
+                alias: "extraction-id",
+                demandOption: true,
+              })
               .option("name", { type: "string", demandOption: true }),
           async (args) => {
             const result = await getExtractionProperty(
@@ -425,11 +485,12 @@ async function start() {
           }
         )
         .command(
-          "getDocuments",
+          ["getDocuments", "get-documents"],
           "Get documents in an extraction",
           (yargs) =>
             yargs.option("extractionId", {
               type: "number",
+              alias: "extraction-id",
               demandOption: true,
             }),
           async (args) => {
@@ -441,11 +502,12 @@ async function start() {
           }
         )
         .command(
-          "getProperties",
+          ["getProperties", "get-properties"],
           "Get properties of an extraction",
           (yargs) =>
             yargs.option("extractionId", {
               type: "number",
+              alias: "extraction-id",
               demandOption: true,
             }),
           async (args) => {
@@ -459,7 +521,7 @@ async function start() {
         .demandCommand(1, "Please specify an extraction subcommand");
     })
     .command(
-      "extractedField <subcommand>",
+      ["extractedField <subcommand>", "extracted-field <subcommand>"],
       "Manage extracted fields",
       (yargs) => {
         yargs
@@ -468,7 +530,11 @@ async function start() {
             "Create an extracted field",
             (yargs) =>
               yargs
-                .option("extractionId", { type: "number", demandOption: true })
+                .option("extractionId", {
+                  type: "number",
+                  alias: "extraction-id",
+                  demandOption: true,
+                })
                 .option("name", { type: "string", demandOption: true })
                 .option("value", { type: "string", demandOption: true })
                 .option("strategy", { type: "string", demandOption: true })
@@ -511,11 +577,12 @@ async function start() {
             }
           )
           .command(
-            "getAll",
+            ["getAll", "get-all"],
             "Get all extracted fields",
             (yargs) =>
               yargs.option("extractionId", {
                 type: "number",
+                alias: "extraction-id",
                 demandOption: true,
               }),
             async (args) => {
@@ -527,11 +594,15 @@ async function start() {
             }
           )
           .command(
-            "getByName",
+            ["getByName", "get-by-name"],
             "Get an extracted field by name",
             (yargs) =>
               yargs
-                .option("extractionId", { type: "number", demandOption: true })
+                .option("extractionId", {
+                  type: "number",
+                  alias: "extraction-id",
+                  demandOption: true,
+                })
                 .option("name", { type: "string", demandOption: true }),
             async (args) => {
               const result = await getExtractedFieldByName(
@@ -548,7 +619,10 @@ async function start() {
       }
     )
     .command(
-      "extractedFieldError <subcommand>",
+      [
+        "extractedFieldError <subcommand>",
+        "extracted-field-error <subcommand>",
+      ],
       "Manage extracted field errors",
       (yargs) => {
         yargs
@@ -557,9 +631,14 @@ async function start() {
             "Create an extracted field error",
             (yargs) =>
               yargs
-                .option("extractionId", { type: "number", demandOption: true })
+                .option("extractionId", {
+                  type: "number",
+                  alias: "extraction-id",
+                  demandOption: true,
+                })
                 .option("extractedFieldId", {
                   type: "number",
+                  alias: "extracted-field-id",
                   demandOption: true,
                 })
                 .option("message", { type: "string", demandOption: true })
@@ -600,12 +679,19 @@ async function start() {
             }
           )
           .command(
-            "getAll",
+            ["getAll", "get-all"],
             "Get all extracted field errors",
             (yargs) =>
               yargs
-                .option("extractionId", { type: "number", demandOption: true })
-                .option("extractedFieldId", { type: "number" }),
+                .option("extractionId", {
+                  type: "number",
+                  alias: "extraction-id",
+                  demandOption: true,
+                })
+                .option("extractedFieldId", {
+                  type: "number",
+                  alias: "extracted-field-id",
+                }),
             async (args) => {
               const result = await getExtractedFieldErrors(
                 args.extractionId,
@@ -631,7 +717,11 @@ async function start() {
           (yargs) =>
             yargs
               .option("strategy", { type: "string", demandOption: true })
-              .option("extractionId", { type: "number", demandOption: true }),
+              .option("extractionId", {
+                type: "number",
+                alias: "extraction-id",
+                demandOption: true,
+              }),
           async (args) => {
             // Predefined keys
             const predefinedKeys = ["_", "$0", "extractionId", "strategy"];
