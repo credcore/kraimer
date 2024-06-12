@@ -1,7 +1,7 @@
 import { getDb } from "../db/index.js";
 import { getDocument } from "./getDocument.js";
 import { Document } from "./types.js";
-import { promises as fs } from "fs";
+import { createFileContent } from "./createFileContent.js";
 
 export async function createDocument(
   name: string,
@@ -10,16 +10,8 @@ export async function createDocument(
   filePath: string
 ): Promise<Document> {
   const db = await getDb();
-  const content = await fs.readFile(filePath);
 
-  const fileContentResult = await db.one(
-    `
-      INSERT INTO file_content (file_path, content, content_type)
-      VALUES ($<filePath>, $<content>, $<contentType>)
-      RETURNING id
-    `,
-    { filePath, content, contentType: "any" }
-  );
+  const fileContent = await createFileContent(filePath, "any");
 
   const documentResult = await db.one(
     `
@@ -27,7 +19,7 @@ export async function createDocument(
       VALUES ($<name>, $<description>, $<type>, $<fileContentId>)
       RETURNING id
     `,
-    { name, description, type, fileContentId: fileContentResult.id }
+    { name, description, type, fileContentId: fileContent.id }
   );
 
   return getDocument(documentResult.id);

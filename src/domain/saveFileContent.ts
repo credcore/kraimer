@@ -3,35 +3,26 @@ import * as os from "os";
 import * as path from "path";
 import { getDb } from "../db/index.js";
 
-export async function saveFileContent(documentId: number, filePath: string | undefined = undefined): Promise<string> {
+export async function saveFileContent(
+  fileContentId: number,
+  filePath: string | undefined = undefined
+): Promise<string> {
   const db = await getDb();
-  const documentResult = await db.oneOrNone(
-    `
-      SELECT file_content_id
-      FROM document
-      WHERE id = $<documentId>
-    `,
-    { documentId }
-  );
-
-  if (!documentResult) {
-    throw new Error(`No document found with id: ${documentId}`);
-  }
-
   const fileContentResult = await db.oneOrNone(
     `
       SELECT content
       FROM file_content
       WHERE id = $<fileContentId>
     `,
-    { fileContentId: documentResult.file_content_id }
+    { fileContentId }
   );
 
   if (!fileContentResult) {
-    throw new Error(`No file content found with id: ${documentResult.file_content_id}`);
+    throw new Error(`No file content found with id: ${fileContentId}`);
   }
 
-  const filePathToSave = filePath ?? path.join(os.tmpdir(), `temp-${Date.now()}.tmp`);
+  const filePathToSave =
+    filePath ?? path.join(os.tmpdir(), `temp-${Date.now()}.tmp`);
   await fs.writeFile(filePathToSave, fileContentResult.content);
 
   return filePathToSave;

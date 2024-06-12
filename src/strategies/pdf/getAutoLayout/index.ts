@@ -4,8 +4,8 @@ import { hideBin } from "yargs/helpers";
 import { createExtractedField } from "../../../domain/createExtractedField.js";
 import { getDocumentsInExtraction } from "../../../domain/getDocumentsInExtraction.js";
 import { saveFileContent } from "../../../domain/saveFileContent.js";
-import { execPythonScript } from "../../../process/execPythonScript.js";
 import { argsToArray } from "../../../process/argsToArray.js";
+import { execPythonScript } from "../../../process/execPythonScript.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -38,12 +38,20 @@ const argv = await yargs(hideBin(process.argv))
     type: "number",
     default: 10,
     describe: "Density for y-coordinate",
+  })
+  .option("print", {
+    type: "boolean",
+    description: "Print the output",
+  })
+  .option("debug", {
+    type: "boolean",
+    description: "Set debug mode",
   }).argv;
 
 const documents = await getDocumentsInExtraction(argv.extractionId);
 
 for (const doc of documents) {
-  const fileName = await saveFileContent(doc.id);
+  const fileName = await saveFileContent(doc.fileContentId);
 
   const pythonScriptPath = path.join(
     __dirname,
@@ -56,9 +64,9 @@ for (const doc of documents) {
 
   await createExtractedField(
     argv.extractionId,
-    "pdf/auto_layout",
+    "pdf/auto-layout",
     output,
-    "pdf/get_auto_layout",
+    "pdf/get-auto-layout",
     "FINISHED"
   );
 }

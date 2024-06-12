@@ -11,6 +11,12 @@ export type Document = {
   properties: DocumentProperty[];
 };
 
+// FileContent.ts
+export type FileContent = {
+  id: number;
+  filePath: string;
+};
+
 // DocumentGroup.ts
 export type DocumentGroup = {
   id: number;

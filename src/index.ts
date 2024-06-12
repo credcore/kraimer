@@ -36,6 +36,8 @@ import { getExtractions } from "./domain/getExtractions.js";
 import { removeDocumentGroupProperty } from "./domain/removeDocumentGroupProperty.js";
 import { removeDocumentProperty } from "./domain/removeDocumentProperty.js";
 import { removeExtractionProperty } from "./domain/removeExtractionProperty.js";
+import { createFileContent } from "./domain/createFileContent.js";
+import { deleteFileContent } from "./domain/deleteFileContent.js";
 import { OrderByEnum, TaskStatusEnum } from "./domain/types.js";
 import { log } from "./logger/log.js";
 import { applyStrategy } from "./strategy/applyStrategy.js";
@@ -46,8 +48,11 @@ async function start() {
   const argv = yargs(hideBin(process.argv))
     .option("print", {
       type: "boolean",
-      default: false,
       description: "Print the output",
+    })
+    .option("debug", {
+      type: "boolean",
+      description: "Set debug mode",
     })
     .command("document <subcommand>", "Manage documents", (yargs) => {
       yargs
@@ -359,6 +364,50 @@ async function start() {
             }
           )
           .demandCommand(1, "Please specify a document-group subcommand");
+      }
+    )
+    .command(
+      ["fileContent <subcommand>", "file-content <subcommand>"],
+      "Manage file contents",
+      (yargs) => {
+        yargs
+          .command(
+            "create",
+            "Create a file content",
+            (yargs) =>
+              yargs
+                .option("filePath", {
+                  type: "string",
+                  demandOption: true,
+                  alias: "file-path",
+                })
+                .option("contentType", {
+                  type: "string",
+                  demandOption: true,
+                  alias: "content-type",
+                }),
+            async (args) => {
+              const result = await createFileContent(
+                args.filePath,
+                args.contentType
+              );
+              if (args.print) {
+                log(result);
+              }
+              process.exit(0);
+            }
+          )
+          .command(
+            "delete",
+            "Delete a file content",
+            (yargs) =>
+              yargs.option("id", { type: "number", demandOption: true }),
+            async (args) => {
+              await deleteFileContent(args.id);
+              process.exit(0);
+            }
+          )
+          .demandCommand(1, "Please specify a fileContent subcommand");
       }
     )
     .command("extraction <subcommand>", "Manage extractions", (yargs) => {
