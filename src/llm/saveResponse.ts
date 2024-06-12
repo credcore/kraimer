@@ -1,5 +1,4 @@
 import { getDb } from "../db/index.js";
-import { debugPrint } from "../logger/log.js";
 import { LLMResponse } from "./types.js";
 
 export async function saveResponse(llmResponse: LLMResponse): Promise<number> {
@@ -31,10 +30,6 @@ export async function saveResponse(llmResponse: LLMResponse): Promise<number> {
   `;
 
   const result = await db.one(query, llmResponse);
-
-  debugPrint(
-    `Added to LLM Response Cache: promptHash=${llmResponse.promptHash}, id=${result.id}`
-  );
 
   return result.id;
 }

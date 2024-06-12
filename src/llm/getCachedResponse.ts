@@ -1,5 +1,4 @@
 import { getDb } from "../db/index.js";
-import { debugPrint } from "../logger/log.js";
 import { LLMResponse } from "./types.js";
 
 export const getCachedResponse = async (
@@ -47,8 +46,6 @@ export const getCachedResponse = async (
     cost: 0,
     error: row.error,
   };
-
-  debugPrint(`Fetch from LLM Response Cache: id=${row.id}`);
 
   return llmResponse;
 };
