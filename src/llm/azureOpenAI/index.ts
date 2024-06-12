@@ -99,10 +99,10 @@ export const invokeCompletion = async (
       totalTokens: responseJson.usage.total_tokens,
       cost: calculateCost(
         model,
-        responseJson.prompt_tokens,
-        responseJson.completion_tokens,
-        responseJson.total_tokens,
-        []
+        responseJson.usage.prompt_tokens,
+        responseJson.usage.completion_tokens,
+        responseJson.usage.total_tokens,
+        messages
       ),
       error: undefined,
     };
@@ -117,12 +117,14 @@ export const invokeCompletion = async (
   }
 };
 
+// In src/llm/azureOpenAI/index.ts
+
 export function calculateCost(
   model: string,
   promptTokens: number,
   completionTokens: number,
   totalTokens: number,
-  images: { [key: string]: number | string }[] = []
+  messages: { role: string; content: any }[]
 ): number {
   // Define the cost per 1000 tokens for each model
   const costPerMillionTokens: {
@@ -145,7 +147,15 @@ export function calculateCost(
     (completionTokens / 1000000) * tokenCost.output;
 
   // Calculate the cost for images
-  const imageCost = images.length * 0.0035;
+  const imageCount = messages.reduce((count, message) => {
+    if (message.content && Array.isArray(message.content)) {
+      count += message.content.filter(
+        (item) => item.type === "image_url"
+      ).length;
+    }
+    return count;
+  }, 0);
+  const imageCost = imageCount * 0.0035;
 
   // Calculate the total cost by adding token cost and image cost
   const totalCost = totalTokenCost + imageCost;
