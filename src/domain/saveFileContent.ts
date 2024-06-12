@@ -3,7 +3,7 @@ import * as os from "os";
 import * as path from "path";
 import { getDb } from "../db/index.js";
 
-export async function saveFileContent(documentId: number): Promise<string> {
+export async function saveFileContent(documentId: number, filePath = undefined): Promise<string> {
   const db = await getDb();
   const documentResult = await db.oneOrNone(
     `
