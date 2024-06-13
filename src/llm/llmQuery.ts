@@ -6,6 +6,7 @@ import { saveResponse } from "./saveResponse.js";
 import { getExtractionCost } from "../domain/getExtractionCost.js";
 import crypto from "crypto";
 import { getCachedResponse } from "./getCachedResponse.js";
+import { prettyPrintMessages } from "./prettyPrintMessages.js";
 
 export async function llmQuery(
   extractionId: number,
@@ -20,7 +21,7 @@ export async function llmQuery(
     maybeMaxCostPerSession ?? process.env.KRAIMER_LLM_MAX_COST_PER_SESSION
       ? Number(process.env.KRAIMER_LLM_MAX_COST_PER_SESSION)
       : 50;
-      
+
   const llmName = maybeLlmName ?? process.env.KRAIMER_LLM;
 
   if (!llmName) {
@@ -51,6 +52,8 @@ export async function llmQuery(
           if (currentCost > maxCostPerSession) {
             throw new Error("Maximum session cost exceeded.");
           }
+
+          debugPrint(prettyPrintMessages(messages));
 
           const responseFromLLM = await llm.invokeCompletion(model, messages);
 
