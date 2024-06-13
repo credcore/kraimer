@@ -7,15 +7,20 @@ import { getExtractionCost } from "../domain/getExtractionCost.js";
 import crypto from "crypto";
 import { getCachedResponse } from "./getCachedResponse.js";
 
-export const llmQuery = async (
+export async function llmQuery(
   extractionId: number,
   model: string,
   messages: Message[],
   useCache: boolean,
-  maxCostPerSession: number,
+  maybeMaxCostPerSession?: number,
   maybeLlmName?: string,
   responseType: string = "json"
-): Promise<{ response: LLMResponse; json?: any; text?: string }> => {
+): Promise<{ response: LLMResponse; json?: any; text?: string }> {
+  const maxCostPerSession =
+    maybeMaxCostPerSession ?? process.env.KRAIMER_LLM_MAX_COST_PER_SESSION
+      ? Number(process.env.KRAIMER_LLM_MAX_COST_PER_SESSION)
+      : 50;
+      
   const llmName = maybeLlmName ?? process.env.KRAIMER_LLM;
 
   if (!llmName) {
@@ -71,4 +76,4 @@ export const llmQuery = async (
       ? { json: responseValue }
       : { text: responseValue }),
   };
-};
+}
