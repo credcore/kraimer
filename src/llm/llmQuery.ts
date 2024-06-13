@@ -6,7 +6,7 @@ import { saveResponse } from "./saveResponse.js";
 import { getExtractionCost } from "../domain/getExtractionCost.js";
 import crypto from "crypto";
 import { getCachedResponse } from "./getCachedResponse.js";
-import { prettyPrintMessages } from "./prettyPrintMessages.js";
+import { toPrettyPrintableMessages } from "./toPrettyPrintableMessages.js";
 
 export async function llmQuery(
   extractionId: number,
@@ -53,7 +53,7 @@ export async function llmQuery(
             throw new Error("Maximum session cost exceeded.");
           }
 
-          debugPrint(prettyPrintMessages(messages));
+          debugPrint(toPrettyPrintableMessages(messages));
 
           const responseFromLLM = await llm.invokeCompletion(model, messages);
 
