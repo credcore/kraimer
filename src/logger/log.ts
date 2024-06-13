@@ -6,6 +6,14 @@ export function log(result: any) {
 
 export function debugPrint(...result: any) {
   if (isDebugging()) {
-    console.log(...result);
+    if (result.length === 1 && typeof result !== "string") {
+      try {
+        console.log(JSON.stringify(result[0]));
+      } catch (ex: any) {
+        console.log(...result);
+      }
+    } else {
+      console.log(...result);
+    }
   }
 }

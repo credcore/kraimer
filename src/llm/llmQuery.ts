@@ -9,13 +9,19 @@ import { getCachedResponse } from "./getCachedResponse.js";
 
 export const llmQuery = async (
   extractionId: number,
-  llmName: string,
   model: string,
   messages: Message[],
   useCache: boolean,
   maxCostPerSession: number,
+  maybeLlmName?: string,
   responseType: string = "json"
 ): Promise<{ response: LLMResponse; json?: any; text?: string }> => {
+  const llmName = maybeLlmName ?? process.env.KRAIMER_LLM;
+
+  if (!llmName) {
+    throw new Error(`Specify an llm name or set the KRAIMER_LLM env variable.`);
+  }
+
   // Calculate a hash of the prompt for caching
   const promptHash = crypto
     .createHash("sha256")

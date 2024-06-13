@@ -89,7 +89,6 @@ for (const doc of documents) {
     ];
     const result = await llmQuery(
       argv.extractionId,
-      "azure_openai",
       "gpt-4o",
       messages,
       true,
