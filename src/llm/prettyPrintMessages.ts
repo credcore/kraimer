@@ -1,6 +1,6 @@
 import { Message } from "./types.js";
 
-export function prettyPrintMessages(messages: Message[], indent = 2): string {
+export function prettyPrintMessages(messages: Message[], indent = 2): object {
   const modifiedMessages = messages.map((message) => {
     if (typeof message.content === "string") {
       return message;
@@ -16,5 +16,5 @@ export function prettyPrintMessages(messages: Message[], indent = 2): string {
     }
   });
 
-  return JSON.stringify(modifiedMessages, null, indent);
+  return modifiedMessages;
 }
