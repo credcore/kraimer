@@ -41,20 +41,20 @@ const query = `
     },
     "Shareholder's equity": {
       "Retained earnings": {
-        "March 30, 2024": "$$128,088",
-        "December 30, 2023": "$$128,832"
+        "March 30, 2024": "$128,088",
+        "December 30, 2023": "$128,832"
       },
       "Accumulated other comprehensive income (loss)": {
-        "March 30, 2024": "$$4,437",
-        "December 30, 2023": "($$313)"
+        "March 30, 2024": "$4,437",
+        "December 30, 2023": "($313)"
       },
       "Total shareholder's equity": {
-        "March 30, 2024": "$$206,093",
-        "December 30, 2023": "$$512,611"
+        "March 30, 2024": "$206,093",
+        "December 30, 2023": "$512,611"
       },
       "Total liabilities and shareholder's equity": {
-        "March 30, 2024": "$$3,696,823",
-        "December 30, 2023": "$$3,662,728"
+        "March 30, 2024": "$3,696,823",
+        "December 30, 2023": "$3,662,728"
       }
     }
   }
