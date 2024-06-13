@@ -11,6 +11,8 @@ export async function getExtractedFieldByName(
       SELECT id, extraction_id, name, value, strategy, status, created_at
       FROM extracted_field
       WHERE extraction_id = $<extractionId> AND name = $<name>
+      ORDER BY id DESC
+      LIMIT 1
     `,
     { extractionId, name }
   );
