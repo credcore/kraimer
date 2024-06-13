@@ -77,6 +77,16 @@ const tablesField = {
 };
 
 for (const doc of documents) {
+  const docEntry = {
+    id: doc.id,
+    name: doc.name,
+    content: {
+      tables: [] as any[],
+    },
+  };
+
+  tablesField.documents.push(docEntry);
+
   for (const file of doc.content.files) {
     const pngFile = await saveFileContent(file.id);
     const base64 = await readFileAsBase64(pngFile);
@@ -103,12 +113,10 @@ for (const doc of documents) {
       true,
       10
     );
-    
-    tablesField.documents.push({
-      id: doc.id,
-      name: doc.name,
-      content: result.json,
-    });
+
+    if (result.json && Object.keys(result.json).length > 0) {
+      docEntry.content.tables.push(result.json);
+    }
   }
 }
 
