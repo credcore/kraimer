@@ -1,12 +1,17 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { getExtractedFieldByName } from "../../../domain/getExtractedFieldByName.js";
-import { saveFileContent } from "../../../domain/saveFileContent.js";
-import { PagePngFieldEntry } from "../../pdf/PagePngFieldEntry.js";
-import { readFileAsBase64 } from "../../../domain/readFileAsBase64.js";
-import { llmQuery } from "../../../llm/llmQuery.js";
-import { Message } from "../../../llm/types.js";
-import { setDebug } from "../../../config.js";
+import { getExtractedFieldByName } from "../../../../domain/getExtractedFieldByName.js";
+import { saveFileContent } from "../../../../domain/saveFileContent.js";
+import { PagePngFieldEntry } from "../../../pdf/PagePngFieldEntry.js";
+import { readFileAsBase64 } from "../../../../domain/readFileAsBase64.js";
+import { llmQuery } from "../../../../llm/llmQuery.js";
+import { Message } from "../../../../llm/types.js";
+import { setDebug } from "../../../../config.js";
+import { TablesEntry } from "./TablesEntry.js";
+import { createExtractedField } from "../../../../domain/createExtractedField.js";
+
+const FIELD_NAME = "semantic/financialDocs/tablesA/tables";
+const STRATEGY = "semantic/financialDocs/tablesA/extractTables";
 
 const argv = await yargs(hideBin(process.argv))
   .option("extractionId", {
@@ -67,6 +72,10 @@ const pngs = await getExtractedFieldByName(argv.extractionId, "pdf/pagePngs");
 
 const documents = JSON.parse(pngs.value).documents as PagePngFieldEntry[];
 
+const tablesField = {
+  documents: [] as TablesEntry[],
+};
+
 for (const doc of documents) {
   for (const file of doc.content.files) {
     const pngFile = await saveFileContent(file.id);
@@ -94,7 +103,21 @@ for (const doc of documents) {
       true,
       10
     );
+    
+    tablesField.documents.push({
+      id: doc.id,
+      name: doc.name,
+      content: result.json,
+    });
   }
 }
+
+await createExtractedField(
+  argv.extractionId,
+  FIELD_NAME,
+  JSON.stringify(tablesField),
+  STRATEGY,
+  "FINISHED"
+);
 
 process.exit(0);
