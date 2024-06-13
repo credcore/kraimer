@@ -14,8 +14,6 @@ export async function createExtractedField(
     `
       INSERT INTO extracted_field (extraction_id, name, value, strategy, status)
       VALUES ($<extractionId>, $<name>, $<value>, $<strategy>, $<status>)
-      ON CONFLICT (extraction_id, name)
-      DO UPDATE SET value = $<value>, strategy = $<strategy>, status = $<status>
       RETURNING id
     `,
     { extractionId, name, value, strategy, status }

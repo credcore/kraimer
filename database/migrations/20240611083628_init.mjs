@@ -70,7 +70,6 @@ export function up(knex) {
       table.text("strategy");
       table.text("status");
       table.timestamp("created_at").defaultTo(knex.fn.now());
-      table.unique(["extraction_id", "name"]);
     })
     .createTable("extraction_property", function (table) {
       table.bigIncrements("id").primary();
@@ -102,8 +101,28 @@ export function up(knex) {
       table.integer("completion_tokens");
       table.integer("total_tokens");
       table.text("error");
+      table.decimal("cost", 18, 6).defaultTo(0).notNullable();
+      table
+        .integer("extraction_id")
+        .unsigned()
+        .notNullable()
+        .references("id")
+        .inTable("extraction")
+        .onDelete("CASCADE")
+        .index();
       table.timestamp("created_at").defaultTo(knex.fn.now());
       table.unique(["prompt_hash", "model", "llm"]);
+    })
+    .createTable("extraction_log", function (table) {
+      table.bigIncrements("id").primary();
+      table.bigInteger("extraction_id").references("id").inTable("extraction");
+      table
+        .bigInteger("extracted_field_id")
+        .references("id")
+        .inTable("extracted_field");
+      table.text("type");
+      table.text("value");
+      table.timestamp("created_at").defaultTo(knex.fn.now());
     });
 }
 
@@ -113,6 +132,7 @@ export function up(knex) {
  */
 export function down(knex) {
   return knex.schema
+    .dropTableIfExists("extraction_log")
     .dropTableIfExists("llm_response")
     .dropTableIfExists("extracted_field_error")
     .dropTableIfExists("extraction_property")
