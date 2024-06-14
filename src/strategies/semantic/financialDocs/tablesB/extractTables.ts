@@ -33,13 +33,11 @@ if (argv.debug) {
 }
 
 const query = `
-  Extract the financial tabular data, including the table title and legends, from the following image.
-  Return the complete tables as a clean, plain JSON object. The JSON must retain the full nesting found in the tables, and no information must be lost.
-  It must be possible to reproduce the table from the JSON you construct.
+Extract the financial tabular data, including the table title and legends, from the following image. Return the tables as a nested JSON object representing the hierarchy of data in the table. All hierarchical information must be captured, and all numbers must be extremely accurate.
 
-  Prior to the JSON, explain what you extracted and why the JSON is structured that way. Again, confirm that it's possible to recreate the entire table from the JSON.
-  
-  If no tabular data is present, return an empty JSON object: {}
+In addition, add another property to the JSON result called "layout." This should capture all necessary information to convert the captured data above to an Excel sheet if required. This can be plain text, essentially describing what you're seeing so that the reader can create an Excel sheet out of it. This means that it may include header names, labels, colspans, etc., and how data is organized, etc. Be as descriptive as you want.
+
+If no tabular data is present, return an empty JSON object: {}
   `;
 
 const pngs = await getExtractedFieldByName(argv.extractionId, "pdf/pagePngs");
