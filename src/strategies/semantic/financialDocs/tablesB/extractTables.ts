@@ -33,7 +33,11 @@ if (argv.debug) {
 }
 
 const query = `
-Extract the financial tabular data, including the table title and legends, from the following image. Return the tables as a nested JSON object representing the hierarchy of data in the table. All hierarchical information must be captured, and all numbers must be extremely accurate.
+Extract the financial tabular data, including the table title and legends, from the following image. Return the tables as a nested JSON object representing the hierarchy of data in the table. All hierarchical information must be captured, no numbers/cells should be missed, and all numbers must be extremely accurate.
+
+If there are sub-tables containing differing structure, create a parent object and place the tables inside them. Don't try to coalesce different structures.
+
+Describe your extraction summary in detail before producing the JSON. For each table (one or many), first analyze and list the columns.
 
 In addition, add another property to the JSON result called "layout." This should capture all necessary information to convert the captured data above to an Excel sheet if required. This can be plain text, essentially describing what you're seeing so that the reader can create an Excel sheet out of it. This means that it may include header names, labels, colspans, etc., and how data is organized, etc. Be as descriptive as you want.
 
