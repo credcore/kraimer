@@ -1,4 +1,5 @@
 import yargs from "yargs";
+import "dotenv/config";
 import { hideBin } from "yargs/helpers";
 
 import * as db from "./db/index.js";

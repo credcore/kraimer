@@ -12,7 +12,7 @@ parse_env() {
     export $(cat $1 | xargs)
 }
 
-parse_env "../.env"
+parse_env "../.env.development.local"
 
 # Check if the correct number of arguments are given
 if [ "$#" -ne 5 ]; then

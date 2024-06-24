@@ -16,7 +16,7 @@ async function executeStrategyFile(
   const argsArray = Object.entries(args)
     .filter((x) => !["extraction-id", "extractionId", "print"].includes(x[0]))
     .flatMap(([key, value]) => [`--${key}`, `${value}`]);
-  const command = `${strategyPath} --extraction-id ${extractionId} ${argsArray.join(
+  const command = `node ${strategyPath} --extraction-id ${extractionId} ${argsArray.join(
     " "
   )}`;
 
