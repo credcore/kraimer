@@ -1,32 +1,23 @@
 {
-  "name": "kraimer",
-  "version": "0.0.1",
-  "description": "Kraimer AI Pipeline",
-  "main": "dist/index.js",
+  "name": "root",
   "private": true,
-  "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "build": "rm -rf dist && npx tsc",
-    "db:migrate:make": "npx dotenv-cli -e .env -- knex --knexfile ./knexfile.mjs migrate:make",
-    "db:migrate:latest": "npx dotenv-cli -e .env -- knex --knexfile ./knexfile.mjs migrate:latest"
-  },
-  "bin": {
-    "kraimer": "dist/index.js"
-  },
+  "workspaces": [
+    "packages/**"
+  ],
   "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://https://github.com/credcore/kraimer-next.git"
+  "scripts": {
+    "db:migrate:make": "npx dotenv-cli -e .env -- knex --knexfile ./knexfile.mjs migrate:make",
+    "db:migrate:latest": "npx dotenv-cli -e .env -- knex --knexfile ./knexfile.mjs migrate:latest",
+    "build": "npm run build --ws",
+    "bootstrap": "npm run build && npm i && npm run db:migrate:latest",
+    "clean": "npm run clean --ws"
   },
   "dependencies": {
     "@types/knex": "^0.16.1",
     "@types/node": "^20.14.2",
-    "@types/pg-promise": "^5.4.3",
-    "@types/yargs": "^17.0.32",
+    "@types/pg": "^8.11.6",
     "knex": "^3.1.0",
-    "openai": "^4.51.0",
-    "pg-promise": "^11.8.0",
-    "yargs": "^17.7.2"
+    "pg": "^8.12.0"
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.2",
