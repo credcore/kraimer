@@ -47,6 +47,7 @@ async function start() {
   await db.init();
 
   const argv = yargs(hideBin(process.argv))
+    .scriptName("kraimer")
     .option("debug", {
       type: "boolean",
       description: "Set debug mode",
