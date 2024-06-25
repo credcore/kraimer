@@ -33,40 +33,97 @@ if (argv.debug) {
 }
 
 const query = `
-  Extract the financial tabular data, including the table title and legends, from the following image.
-  Return the complete tables as a clean, plain JSON object.
-  Totals and subtotals should be indented. Column labels should always be in the last level of the hierarchy. For example:
-  
-  \`\`\`json
-  {
-    "header": {
-      "name": "MTD PRODUCTS INC",
-      "title": "CONSOLIDATED BALANCE SHEETS",
-      "legend": "(Dollars in thousands)"
-    },
-    "Shareholder's equity": {
-      "Retained earnings": {
-        "March 30, 2024": "$128,088",
-        "December 30, 2023": "$128,832"
-      },
-      "Accumulated other comprehensive income (loss)": {
-        "March 30, 2024": "$4,437",
-        "December 30, 2023": "($313)"
-      },
-      "Total shareholder's equity": {
-        "March 30, 2024": "$206,093",
-        "December 30, 2023": "$512,611"
-      },
-      "Total liabilities and shareholder's equity": {
-        "March 30, 2024": "$3,696,823",
-        "December 30, 2023": "$3,662,728"
-      }
-    }
-  }
-  \`\`\`
-  
-  If no tabular data is present, return an empty JSON object: {}
-  `;
+Extract the financial tabular data, including the table metadata (title and legends), from the following image. Return the complete tables as a clean, plain JSON object, with values as arrays. Subgroups, totals, and subtotals should be indented. Column headings should be flattened (combined headers merged into every column below them) and listed simply.
+
+Example 1
+
+Input table:
+
+\`\`\`
+          MTD PRODUCTS INC
+          CONSOLIDATED BALANCE SHEETS
+          (Dollars in thousands)
+           |       |     |   As of July 31
+           |       |     |   2021  |  2020
+Assets     |       |     |         |      
+           |Cash   |     |   $174  |  $164
+           |AccRec |     |   $401  |  $404
+           |Invent |     |   $553  |  $425
+           |       |Total|  $1168  | $1024
+Liabilities|       |     |
+           |Debt   |     |   $100  |  $100
+           |AccPay |     |   $370  |  $328
+           |       |Total|   $470  |  $428
+\`\`\`
+
+Expected JSON output:      
+
+\`\`\`json
+{
+  "metadata": {
+    "name": "MTD PRODUCTS INC",
+    "title": "CONSOLIDATED BALANCE SHEETS",
+    "legend": "(Dollars in thousands)"
+  },
+  "columns": ["", "", "", "As of July 31 2021", "As of July 31 2020"],
+  "rows": [
+    ["Assets", "", "", "", ""],
+    ["", "Cash", "", "$174", "$164"],
+    ["", "AccRec", "", "$401", "$404"],
+    ["", "Invent", "", "$553", "$425"],
+    ["", "", "Total", "$1168", "$1024"],
+    ["Liabilities", "", "", "", ""],
+    ["", "Debt", "", "$174", "$164"],
+    ["", "AccPay", "", "$401", "$404"],
+    ["", "", "Total", "$1168", "$1024"]
+  ]
+}
+\`\`\`
+
+Example 2
+
+Input table:
+
+\`\`\`
+Acme Corp
+Condensed Consolidated Statements of Operations
+(In thousands, except per share information)
+                                    Nine months ended    
+                                  Sept 30,               
+                                   2022       Oct 1, 2021
+Operating activities                                     
+Net loss                          $ (74,639)  $ (85,610)
+Adjustments to reconcile loss:                           
+  Depreciation                       16,850      17,908
+  Amortization of goodwill           50,610      82,175
+  Bad debt and other accts recv         654       (565)
+  Deferred income tax expense         1,079         142
+\`\`\`
+
+Expected JSON output:      
+
+\`\`\`json
+{
+  "metadata": {
+    "name": "Acme Corp",
+    "title": "Condensed Consolidated Statements of Operations",
+    "legend": "(In thousands, except per share information)"
+  },
+  "columns": ["", "", "Nine months ended Sept 30, 2022", "Nine months ended Oct 1, 2021"],
+  "rows": [
+    ["Operating activities", "", "", ""],
+    ["Net loss", "", "$(74,639)", "$(85,610)"],
+    ["Adjustments to reconcile loss:", "", "", ""],
+    ["", "Depreciation", "16,850", "17,908"],
+    ["", "Amortization of goodwill", "50,610", "82,175"],
+    ["", "Bad debt and other accts recv", "654", "(565)"],
+    ["", "Deferred income tax expense", "1,079", "142"],
+  ]
+}
+\`\`\`
+
+If no tabular data is present, return an empty JSON object: {}
+`;
 
 const pngs = await getExtractedFieldByName(argv.extractionId, "pdf/pagePngs");
 
