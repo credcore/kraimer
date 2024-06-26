@@ -1,6 +1,5 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { TablesEntryFieldEntry } from "./TablesEntryFieldEntry.js";
 import { setDebug } from "kraimer/dist/config.js";
 import { getExtractedFieldByName } from "kraimer/dist/domain/getExtractedFieldByName.js";
 import { PagePngFieldEntry } from "kraimer-pdf-strategies/dist/PagePngFieldEntry.js";
@@ -9,9 +8,10 @@ import { readFileAsBase64 } from "kraimer/dist/domain/readFileAsBase64.js";
 import { Message } from "kraimer/dist/llm/types.js";
 import { llmQuery } from "kraimer/dist/llm/llmQuery.js";
 import { createExtractedField } from "kraimer/dist/domain/createExtractedField.js";
+import { PagesTablesFieldEntry } from "./PagesTablesFieldEntry.js";
 
-const FIELD_NAME = "semantic/financialDocs/tablesB/tables";
-const STRATEGY = "semantic/financialDocs/tablesB/extractTables";
+const FIELD_NAME = "semantic/financialDocs/tablesB/pageTables";
+const STRATEGY = "semantic/financialDocs/tablesB/pageTables";
 
 const argv = await yargs(hideBin(process.argv))
   .option("extractionId", {
@@ -33,15 +33,33 @@ if (argv.debug) {
 }
 
 const query = `
-Extract the financial tabular data, including the table title and legends, from the following image. Return the tables as a nested JSON object representing the hierarchy of data in the table. All hierarchical information must be captured, no numbers/cells should be missed, and all numbers must be extremely accurate.
+This image is a page from financial document. Check the image carefully to detect if there are any tables in it. 
+Tables need not necessarily have lines separating rows; instead look for the presence of columnar data in any form.
+You must not miss any tables.
 
-If there are sub-tables containing differing structure, create a parent object and place the tables inside them. Don't try to coalesce different structures.
+You must respond with the following JSON.
 
-Describe your extraction summary in detail before producing the JSON. For each table (one or many), first analyze and list the columns.
+\`\`\`json
+{
+  "tables": [
+    {
+      "name": "Q1 Financial Data",
+      "summary": "This table contains Q1 2024 financial data for Random Corp"
+    },
+    {
+      "name": "Q2 Financial Data",
+      "summary": "This table contains Q1 2024 financial data for Random Corp"
+    }
+  ]
+}
 
-In addition, add another property to the JSON result called "layout." This should capture all necessary information to convert the captured data above to an Excel sheet if required. This can be plain text, essentially describing what you're seeing so that the reader can create an Excel sheet out of it. This means that it may include header names, labels, colspans, etc., and how data is organized, etc. Be as descriptive as you want.
+If no tables are found, the array can be empty.
+{
+  "tables": []
+}
+\`\`\`
 
-If no tabular data is present, return an empty JSON object: {}
+Summarize your analysis before producing the JSON. 
   `;
 
 const pngs = await getExtractedFieldByName(argv.extractionId, "pdf/pagePngs");
@@ -49,21 +67,23 @@ const pngs = await getExtractedFieldByName(argv.extractionId, "pdf/pagePngs");
 const documents = JSON.parse(pngs.value).documents as PagePngFieldEntry[];
 
 const tablesField = {
-  documents: [] as TablesEntryFieldEntry[],
+  documents: [] as PagesTablesFieldEntry[],
 };
 
 for (const doc of documents) {
-  const docEntry = {
+  const docEntry: PagesTablesFieldEntry = {
     id: doc.id,
     name: doc.name,
     content: {
-      tables: [] as any[],
+      pages: [],
     },
   };
 
   tablesField.documents.push(docEntry);
 
+  let pageNumber = 0;
   for (const file of doc.content.files) {
+    pageNumber++;
     const pngFile = await saveFileContent(file.id);
     const base64 = await readFileAsBase64(pngFile);
     const base64Url = `data:image/png;base64,${base64}`;
@@ -77,7 +97,7 @@ for (const doc of documents) {
           },
           {
             type: "image_url",
-            image_url: { url: base64Url },
+            image_url: { url: base64Url, detail: "high" },
           },
         ],
       },
@@ -90,8 +110,11 @@ for (const doc of documents) {
       10
     );
 
-    if (result.json && Object.keys(result.json).length > 0) {
-      docEntry.content.tables.push(result.json);
+    if (result.json && result.json.tables && result.json.tables.length > 0) {
+      docEntry.content.pages.push({
+        pageNumber,
+        tables: result.json.tables,
+      });
     }
   }
 }

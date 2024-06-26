@@ -1,4 +1,4 @@
-export type TablesEntry = {
+export type TablesEntryFieldEntry = {
   id: number;
   name: string;
   content: {

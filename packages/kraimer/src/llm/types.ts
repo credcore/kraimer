@@ -41,7 +41,7 @@ export type MessageContent =
     }
   | {
       type: "image_url";
-      image_url: { url: string };
+      image_url: { url: string; detail?: "high" | "low" };
     };
 
 export type Message = { role: "user"; content: string | MessageContent[] };
