@@ -28,7 +28,7 @@ DOC_GROUP_NAME=$4
 EXTRACTION_NAME=$5
 
 # Store the node command in a variable for reuse
-NODE_CMD="node ../dist/index.js"
+NODE_CMD="node ../packages/kraimer/dist/index.js"
 
 # Step 1: Create a document
 create_document_output=$($NODE_CMD document create --type "$DOCUMENT_TYPE" --file-path "$FILE_PATH" --name "$DOCUMENT_NAME")
