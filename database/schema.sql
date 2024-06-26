@@ -119,11 +119,6 @@ CREATE TABLE "extraction_log" (
     "value" text
 );
 
--- Unique Constraints statements
-ALTER TABLE "document" ADD CONSTRAINT "document_name_unique" UNIQUE ("name");
-ALTER TABLE "document_group" ADD CONSTRAINT "document_group_name_unique" UNIQUE ("name");
-ALTER TABLE "extraction" ADD CONSTRAINT "extraction_name_unique" UNIQUE ("name");
-ALTER TABLE "llm_response" ADD CONSTRAINT "llm_response_prompt_hash_model_llm_unique" UNIQUE ("prompt_hash", "model", "llm");
 -- Foreign Key and Index statements
 ALTER TABLE "document" ADD CONSTRAINT "document_file_content_id_foreign" FOREIGN KEY ("file_content_id") REFERENCES "file_content"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "document_group_document" ADD CONSTRAINT "document_group_document_document_group_id_foreign" FOREIGN KEY ("document_group_id") REFERENCES "document_group"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
@@ -137,5 +132,13 @@ ALTER TABLE "extracted_field_error" ADD CONSTRAINT "extracted_field_error_extrac
 ALTER TABLE "llm_response" ADD CONSTRAINT "llm_response_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extraction_log" ADD CONSTRAINT "extraction_log_extraction_id_foreign" FOREIGN KEY ("extraction_id") REFERENCES "extraction"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "extraction_log" ADD CONSTRAINT "extraction_log_extracted_field_id_foreign" FOREIGN KEY ("extracted_field_id") REFERENCES "extracted_field"("id") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
-CREATE INDEX ON "llm_response" USING CREATE INDEX llm_response_extraction_id_index ON public.llm_response USING btree (extraction_id);
+CREATE INDEX document_name_unique ON "document" USING CREATE UNIQUE INDEX document_name_unique ON public.document USING btree (name);
+CREATE INDEX document_group_name_unique ON "document_group" USING CREATE UNIQUE INDEX document_group_name_unique ON public.document_group USING btree (name);
+CREATE INDEX extraction_name_unique ON "extraction" USING CREATE UNIQUE INDEX extraction_name_unique ON public.extraction USING btree (name);
+CREATE INDEX llm_response_extraction_id_index ON "llm_response" USING CREATE INDEX llm_response_extraction_id_index ON public.llm_response USING btree (extraction_id);
+CREATE INDEX llm_response_prompt_hash_model_llm_unique ON "llm_response" USING CREATE UNIQUE INDEX llm_response_prompt_hash_model_llm_unique ON public.llm_response USING btree (prompt_hash, model, llm);
+ALTER TABLE "document" ADD CONSTRAINT "document_name_unique" UNIQUE ("name");
+ALTER TABLE "document_group" ADD CONSTRAINT "document_group_name_unique" UNIQUE ("name");
+ALTER TABLE "extraction" ADD CONSTRAINT "extraction_name_unique" UNIQUE ("name");
+ALTER TABLE "llm_response" ADD CONSTRAINT "llm_response_prompt_hash_model_llm_unique" UNIQUE ("prompt_hash", "model", "llm");
 COMMIT;
