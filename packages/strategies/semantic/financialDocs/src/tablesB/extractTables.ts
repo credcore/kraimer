@@ -1,6 +1,6 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { TablesEntry } from "./TablesEntry.js";
+import { TablesEntryFieldEntry } from "./TablesEntryFieldEntry.js";
 import { setDebug } from "kraimer/dist/config.js";
 import { getExtractedFieldByName } from "kraimer/dist/domain/getExtractedFieldByName.js";
 import { PagePngFieldEntry } from "kraimer-pdf-strategies/dist/PagePngFieldEntry.js";
@@ -49,7 +49,7 @@ const pngs = await getExtractedFieldByName(argv.extractionId, "pdf/pagePngs");
 const documents = JSON.parse(pngs.value).documents as PagePngFieldEntry[];
 
 const tablesField = {
-  documents: [] as TablesEntry[],
+  documents: [] as TablesEntryFieldEntry[],
 };
 
 for (const doc of documents) {
