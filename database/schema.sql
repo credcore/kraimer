@@ -137,8 +137,16 @@ CREATE INDEX document_group_name_unique ON "document_group" USING CREATE UNIQUE 
 CREATE INDEX extraction_name_unique ON "extraction" USING CREATE UNIQUE INDEX extraction_name_unique ON public.extraction USING btree (name);
 CREATE INDEX llm_response_extraction_id_index ON "llm_response" USING CREATE INDEX llm_response_extraction_id_index ON public.llm_response USING btree (extraction_id);
 CREATE INDEX llm_response_prompt_hash_model_llm_unique ON "llm_response" USING CREATE UNIQUE INDEX llm_response_prompt_hash_model_llm_unique ON public.llm_response USING btree (prompt_hash, model, llm);
+CREATE INDEX document_property_document_id_name_unique ON "document_property" USING CREATE UNIQUE INDEX document_property_document_id_name_unique ON public.document_property USING btree (document_id, name);
+CREATE INDEX document_group_property_document_group_id_name_unique ON "document_group_property" USING CREATE UNIQUE INDEX document_group_property_document_group_id_name_unique ON public.document_group_property USING btree (document_group_id, name);
+CREATE INDEX extraction_property_extraction_id_name_unique ON "extraction_property" USING CREATE UNIQUE INDEX extraction_property_extraction_id_name_unique ON public.extraction_property USING btree (extraction_id, name);
+CREATE INDEX extracted_field_extraction_id_name_unique ON "extracted_field" USING CREATE UNIQUE INDEX extracted_field_extraction_id_name_unique ON public.extracted_field USING btree (extraction_id, name);
 ALTER TABLE "document" ADD CONSTRAINT "document_name_unique" UNIQUE ("name");
 ALTER TABLE "document_group" ADD CONSTRAINT "document_group_name_unique" UNIQUE ("name");
+ALTER TABLE "document_group_property" ADD CONSTRAINT "document_group_property_document_group_id_name_unique" UNIQUE ("name", "document_group_id");
+ALTER TABLE "document_property" ADD CONSTRAINT "document_property_document_id_name_unique" UNIQUE ("name", "document_id");
+ALTER TABLE "extracted_field" ADD CONSTRAINT "extracted_field_extraction_id_name_unique" UNIQUE ("extraction_id", "name");
 ALTER TABLE "extraction" ADD CONSTRAINT "extraction_name_unique" UNIQUE ("name");
-ALTER TABLE "llm_response" ADD CONSTRAINT "llm_response_prompt_hash_model_llm_unique" UNIQUE ("prompt_hash", "model", "llm");
+ALTER TABLE "extraction_property" ADD CONSTRAINT "extraction_property_extraction_id_name_unique" UNIQUE ("extraction_id", "name");
+ALTER TABLE "llm_response" ADD CONSTRAINT "llm_response_prompt_hash_model_llm_unique" UNIQUE ("llm", "model", "prompt_hash");
 COMMIT;
