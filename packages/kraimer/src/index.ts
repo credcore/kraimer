@@ -3,13 +3,13 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 import * as db from "./db/index.js";
-import { addDocumentGroupProperty } from "./domain/addDocumentGroupProperty.js";
-import { addDocumentProperty } from "./domain/addDocumentProperty.js";
+import { saveDocumentGroupProperty } from "./domain/saveDocumentGroupProperty.js";
+import { saveDocumentProperty } from "./domain/saveDocumentProperty.js";
 import { addDocumentToGroup } from "./domain/addDocumentToGroup.js";
-import { addExtractionProperty } from "./domain/addExtractionProperty.js";
+import { saveExtractionProperty } from "./domain/saveExtractionProperty.js";
 import { createDocument } from "./domain/createDocument.js";
 import { createDocumentGroup } from "./domain/createDocumentGroup.js";
-import { createExtractedField } from "./domain/createExtractedField.js";
+import { saveExtractedField } from "./domain/saveExtractedField.js";
 import { createExtractedFieldError } from "./domain/createExtractedFieldError.js";
 import { createExtraction } from "./domain/createExtraction.js";
 import { deleteDocument } from "./domain/deleteDocument.js";
@@ -135,8 +135,8 @@ async function start() {
           }
         )
         .command(
-          ["addProperty", "add-property"],
-          "Add a property to a document",
+          ["saveProperty", "save-property"],
+          "Saves a property for a document",
           (yargs) =>
             yargs
               .option("documentId", {
@@ -147,7 +147,7 @@ async function start() {
               .option("name", { type: "string", demandOption: true })
               .option("value", { type: "string", demandOption: true }),
           async (args) => {
-            await addDocumentProperty(args.documentId, args.name, args.value);
+            await saveDocumentProperty(args.documentId, args.name, args.value);
           }
         )
         .command(
@@ -274,8 +274,8 @@ async function start() {
             }
           )
           .command(
-            ["addProperty", "add-property"],
-            "Add a property to a document group",
+            ["saveProperty", "save-property"],
+            "Saves a property for a document group",
             (yargs) =>
               yargs
                 .option("documentGroupId", {
@@ -286,7 +286,7 @@ async function start() {
                 .option("name", { type: "string", demandOption: true })
                 .option("value", { type: "string", demandOption: true }),
             async (args) => {
-              await addDocumentGroupProperty(
+              await saveDocumentGroupProperty(
                 args.documentGroupId,
                 args.name,
                 args.value
@@ -457,8 +457,8 @@ async function start() {
           }
         )
         .command(
-          ["addProperty", "add-property"],
-          "Add a property to an extraction",
+          ["saveProperty", "save-property"],
+          "Saves a property for an extraction",
           (yargs) =>
             yargs
               .option("extractionId", {
@@ -469,7 +469,7 @@ async function start() {
               .option("name", { type: "string", demandOption: true })
               .option("value", { type: "string", demandOption: true }),
           async (args) => {
-            await addExtractionProperty(
+            await saveExtractionProperty(
               args.extractionId,
               args.name,
               args.value
@@ -566,8 +566,8 @@ async function start() {
       (yargs) => {
         yargs
           .command(
-            "create",
-            "Create an extracted field",
+            "save",
+            "Saves an extracted field",
             (yargs) =>
               yargs
                 .option("extractionId", {
@@ -580,7 +580,7 @@ async function start() {
                 .option("strategy", { type: "string", demandOption: true })
                 .option("status", { type: "string", demandOption: true }),
             async (args) => {
-              const result = await createExtractedField(
+              const result = await saveExtractedField(
                 args.extractionId,
                 args.name,
                 args.value,

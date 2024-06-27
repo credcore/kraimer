@@ -8,7 +8,7 @@ import { saveFileContent } from "kraimer/dist/domain/saveFileContent.js";
 import { readFileAsBase64 } from "kraimer/dist/domain/readFileAsBase64.js";
 import { Message } from "kraimer/dist/llm/types.js";
 import { llmQuery } from "kraimer/dist/llm/llmQuery.js";
-import { createExtractedField } from "kraimer/dist/domain/createExtractedField.js";
+import { saveExtractedField } from "kraimer/dist/domain/saveExtractedField.js";
 
 const FIELD_NAME = "semantic/financialDocs/tablesA/tables";
 const STRATEGY = "semantic/financialDocs/tablesA/extractTables";
@@ -177,7 +177,7 @@ for (const doc of documents) {
   }
 }
 
-await createExtractedField(
+await saveExtractedField(
   argv.extractionId,
   FIELD_NAME,
   JSON.stringify(tablesField),

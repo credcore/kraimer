@@ -7,7 +7,7 @@ import { AutoLayoutFieldEntry } from "./AutoLayoutFieldEntry.js";
 import { saveFileContent } from "kraimer/dist/domain/saveFileContent.js";
 import { argsToArray } from "kraimer/dist/process/argsToArray.js";
 import { execPythonScript } from "kraimer/dist/process/execPythonScript.js";
-import { createExtractedField } from "kraimer/dist/domain/createExtractedField.js";
+import { saveExtractedField } from "kraimer/dist/domain/saveExtractedField.js";
 
 const FIELD_NAME = "pdf/autoLayout";
 const STRATEGY = "pdf/getAutoLayout";
@@ -84,7 +84,7 @@ for (const doc of documents) {
   });
 }
 
-await createExtractedField(
+await saveExtractedField(
   argv.extractionId,
   FIELD_NAME,
   JSON.stringify(autoLayoutField),
