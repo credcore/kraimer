@@ -116,7 +116,7 @@ Here is an example workflow to create a document, add it to a group, and create 
 - `delete`: Delete a document by ID.
 - `get`: Get a document by ID.
 - `getAll`: Get all documents with optional filters.
-- `addProperty`: Add a property to a document.
+- `saveProperty`: Add a property to a document.
 - `removeProperty`: Remove a property from a document.
 - `getProperty`: Get a property from a document.
 - `getProperties`: Get all properties from a document.
@@ -127,7 +127,7 @@ Here is an example workflow to create a document, add it to a group, and create 
 - `delete`: Delete a document group by ID.
 - `get`: Get a document group by ID.
 - `getAll`: Get all document groups with optional filters.
-- `addProperty`: Add a property to a document group.
+- `saveProperty`: Add a property to a document group.
 - `removeProperty`: Remove a property from a document group.
 - `getProperty`: Get a property from a document group.
 - `addDocument`: Add a document to a document group.
@@ -143,7 +143,7 @@ Here is an example workflow to create a document, add it to a group, and create 
 - `delete`: Delete an extraction by ID.
 - `get`: Get an extraction by ID.
 - `getAll`: Get all extractions for a document group.
-- `addProperty`: Add a property to an extraction.
+- `saveProperty`: Add a property to an extraction.
 - `removeProperty`: Remove a property from an extraction.
 - `getProperty`: Get a property from an extraction.
 - `getDocuments`: Get documents in an extraction.
@@ -152,7 +152,7 @@ Here is an example workflow to create a document, add it to a group, and create 
 
 ### Extracted Field Commands
 
-- `create`: Create an extracted field.
+- `save`: Create an extracted field.
 - `delete`: Delete an extracted field by ID.
 - `get`: Get an extracted field by ID.
 - `getAll`: Get all extracted fields for an extraction.
