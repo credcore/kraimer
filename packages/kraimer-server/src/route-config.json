@@ -1,0 +1,276 @@
+{
+  "routes": {
+    "/documents": {
+      "method": "POST",
+      "command": "node dist/index.js document create",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "name",
+          "httpParam": "name",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "description",
+          "httpParam": "description"
+        },
+        {
+          "type": "option",
+          "name": "type",
+          "httpParam": "type",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "file-path",
+          "httpParam": "filePath",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "document"
+      }
+    },
+    "/documents/{id}": {
+      "method": "GET",
+      "command": "node dist/index.js document get",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "id",
+          "httpParam": "id",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "document"
+      }
+    },
+    "/documents": {
+      "method": "GET",
+      "command": "node dist/index.js document getAll",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "start-from",
+          "httpParam": "startFrom",
+          "value": 0
+        },
+        {
+          "type": "option",
+          "name": "count",
+          "httpParam": "count",
+          "value": 10
+        },
+        {
+          "type": "option",
+          "name": "filter-name",
+          "httpParam": "filterName"
+        },
+        {
+          "type": "option",
+          "name": "order-by",
+          "httpParam": "orderBy",
+          "value": "ASC"
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "documents"
+      }
+    },
+    "/documents/{id}": {
+      "method": "DELETE",
+      "command": "node dist/index.js document delete",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "id",
+          "httpParam": "id",
+          "required": true
+        }
+      ]
+    },
+    "/extractions": {
+      "method": "POST",
+      "command": "node dist/index.js extraction create",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "document-group-id",
+          "httpParam": "documentGroupId",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "name",
+          "httpParam": "name",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "status",
+          "httpParam": "status",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "extraction"
+      }
+    },
+    "/extractions/{id}": {
+      "method": "GET",
+      "command": "node dist/index.js extraction get",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "id",
+          "httpParam": "id",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "extraction"
+      }
+    },
+    "/extractions": {
+      "method": "GET",
+      "command": "node dist/index.js extraction getAll",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "document-group-id",
+          "httpParam": "documentGroupId",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "extractions"
+      }
+    },
+    "/extractions/{id}": {
+      "method": "DELETE",
+      "command": "node dist/index.js extraction delete",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "id",
+          "httpParam": "id",
+          "required": true
+        }
+      ]
+    },
+    "/extracted-fields": {
+      "method": "POST",
+      "command": "node dist/index.js extractedField create",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "extraction-id",
+          "httpParam": "extractionId",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "name",
+          "httpParam": "name",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "value",
+          "httpParam": "value",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "strategy",
+          "httpParam": "strategy",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "status",
+          "httpParam": "status",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "extractedField"
+      }
+    },
+    "/extracted-fields/{id}": {
+      "method": "GET",
+      "command": "node dist/index.js extractedField get",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "id",
+          "httpParam": "id",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "extractedField"
+      }
+    },
+    "/extracted-fields": {
+      "method": "GET",
+      "command": "node dist/index.js extractedField getAll",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "extraction-id",
+          "httpParam": "extractionId",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "extractedFields"
+      }
+    },
+    "/extracted-fields/{id}": {
+      "method": "DELETE",
+      "command": "node dist/index.js extractedField delete",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "id",
+          "httpParam": "id",
+          "required": true
+        }
+      ]
+    },
+    "/apply-strategy": {
+      "method": "POST",
+      "command": "node dist/index.js extract field",
+      "parameters": [
+        {
+          "type": "option",
+          "name": "strategy",
+          "httpParam": "strategy",
+          "required": true
+        },
+        {
+          "type": "option",
+          "name": "extraction-id",
+          "httpParam": "extractionId",
+          "required": true
+        }
+      ],
+      "response": {
+        "type": "json",
+        "field": "result"
+      }
+    }
+  }
+}

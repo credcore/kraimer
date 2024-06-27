@@ -1,0 +1,30 @@
+{
+  "name": "cg2",
+  "version": "1.0.0",
+  "description": "webservice for kraimer",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "npm run build && dotenv -e .env.development.local -- node ./dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "rimraf dist && tsc && npm run copy-files",
+    "copy-files": "copyfiles -u 1 src/**/*.json dist/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "gyadav",
+  "license": "ISC",
+  "dependencies": {
+    "express": "4.17.1",
+    "multer": "1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "dotenv-cli": "5.0.0",
+    "@types/express": "4.17.13",
+    "@types/multer": "1.4.7",
+    "@types/node": "16.11.12",
+    "copyfiles": "2.4.1",
+    "ts-node-dev": "2.0.0",
+    "typescript": "4.5.3",
+    "rimraf": "5.0.0"
+  }
+}
